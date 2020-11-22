@@ -45,13 +45,17 @@ DEAI_MODULE_CODES = {
     "8": "Codename Gestapo"
 }
 
-@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['einfo', 'externalinfo', 'sw', 'spamwatch', 'deai', 'spb', 'spamprotection', 'cas', 'combot', 'rose'], prefixes=config['config']['prefixes']))
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['einfo', 'externalinfo', 'owl', 'owlantispam', 'sw', 'spamwatch', 'deai', 'spb', 'spamprotection', 'cas', 'combot', 'rose'], prefixes=config['config']['prefixes']))
 @log_errors
 @public_log_errors
 async def fedstat(client, message):
     entity = message.from_user
     args = message.command
     command = args.pop(0).lower()
+
+    swtoken = {"token": config["config"]["spamwatch_api"], "endpoint": "https://api.spamwat.ch/banlist/"}
+    owltoken = {"token": config["config"]["owlantispam_api"], "endpoint": "http://kantek.eule.computer/"}
+
     if args:
         entity = ' '.join(args)
     elif not getattr(message.reply_to_message, 'empty', True):
@@ -63,7 +67,9 @@ async def fedstat(client, message):
     if entity.startswith('TEL-') or int(entity) < 0 or command in ('spb', 'spamprotection'):
         await message.reply_text(f'Spam Protection:\n{await get_spam_protection(entity)}')
     elif command in ('sw', 'spamwatch'):
-        await message.reply_text(f'SpamWatch:\n{await get_spamwatch(entity)}')
+        await message.reply_text(f'SpamWatch:\n{await get_spamwatch(swtoken, entity)}')
+    elif command in ('owl', 'owlantispam'):
+        await message.reply_text(f'Owl Antispam:\n{await get_spamwatch(owltoken, entity)}')
     elif command == 'deai':
         await message.reply_text(f'DEAI:\n{await get_deai(client, entity)}')
     elif command == 'rose':
@@ -71,9 +77,12 @@ async def fedstat(client, message):
     elif command in ('cas', 'combot'):
         await message.reply_text(f'CAS:\n{await get_cas(entity)}')
     else:
-        spamwatch, deai, cas, spam_protection, rose = await asyncio.gather(get_spamwatch(entity), get_deai(client, entity), get_cas(entity), get_spam_protection(entity), get_rose(client, entity))
+        spamwatch, owl, deai, cas, spam_protection, rose = await asyncio.gather(get_spamwatch(swtoken, entity), get_spamwatch(owltoken, entity), get_deai(client, entity), get_cas(entity), get_spam_protection(entity), get_rose(client, entity))
         await message.reply_text(f'''SpamWatch:
 {spamwatch}
+
+Owl Antispam:
+{owl}
 
 CAS:
 {cas}
@@ -87,8 +96,8 @@ DEAI:
 Spam Protection:
 {spam_protection}''')
 
-async def get_spamwatch(entity):
-    async with session.get(f'https://api.spamwat.ch/banlist/{entity}', headers={'Authorization': f'Bearer {config["config"]["spamwatch_api"]}'}) as resp:
+async def get_spamwatch(token, entity):
+    async with session.get(f'{token["endpoint"]}{entity}', headers={'Authorization': f'Bearer {token["token"]}'}) as resp:
         try:
             json = await resp.json()
         except Exception as ex:
