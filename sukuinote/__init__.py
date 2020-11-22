@@ -7,6 +7,7 @@ import traceback
 import functools
 import yaml
 import aiohttp
+from time import sleep
 from datetime import timedelta
 from pyrogram import Client, StopPropagation, ContinuePropagation
 from pyrogram.types import Chat, User
@@ -86,6 +87,29 @@ async def get_user(client, entity):
                 entity = await slave.get_users(entity)
                 entity_client = slave
     return entity, entity_client
+
+# async def CheckAdmin(message: Message):
+#     """Check if we are an admin."""
+#     admin = "administrator"
+#     creator = "creator"
+#     ranks = [admin, creator]
+
+#     SELF = await Client.get_chat_member(
+#         chat_id=message.chat.id, user_id=message.from_user.id
+#     )
+
+#     if SELF.status not in ranks:
+#         await message.edit("__I'm not Admin!__")
+#         sleep(2)
+#         await message.delete()
+
+#     else:
+#         if SELF.status is not admin or SELF.can_restrict_members:
+#             return True
+#         else:
+#             await message.edit("__No Permissions to restrict Members__")
+#             sleep(2)
+#             await message.delete()
 
 def log_errors(func):
     @functools.wraps(func)

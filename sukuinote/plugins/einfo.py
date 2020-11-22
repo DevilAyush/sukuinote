@@ -212,6 +212,10 @@ help_dict['einfo'] = ('External Info',
 {prefix}externalinfo <i>(as reply to message)</i> - Get extended info of replied user
 Aliases: {prefix}extinfo, {prefix}einfo
 
+{prefix}owlantispam <i>&lt;user&gt;</i> - Get Owl Anti-Spam info of <i>&lt;user&gt;</i>
+{prefix}owlantispam <i>(as reply to message)</i> - Get Owl Anti-Spam info of replied user
+Aliases: {prefix}owl
+
 {prefix}spamwatch <i>&lt;user&gt;</i> - Get SpamWatch info of <i>&lt;user&gt;</i>
 {prefix}spamwatch <i>(as reply to message)</i> - Get SpamWatch info of replied user
 Aliases: {prefix}sw

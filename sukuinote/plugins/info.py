@@ -25,6 +25,10 @@ def _generate_sexy(entity, ping):
         sexy_text += ' <code>[SUPPORT]</code>'
     if entity.is_scam:
         sexy_text += ' <code>[SCAM]</code>'
+    if entity.is_contact:
+        sexy_text += ' <code>[CONTACT]</code>'
+    if entity.is_mutual_contact:
+        sexy_text += ' <code>[MUTUAL]</code>'
     return sexy_text
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['info', 'whois'], prefixes=config['config']['prefixes']))
