@@ -1,7 +1,7 @@
 import html
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
-from .. import config, help_dict, log_errors, public_log_errors
+from .. import config, help_dict, get_entity, log_chat, log_errors, CheckAdmin
 
 # Mute Permissions
 mute_permission = ChatPermissions(
@@ -65,26 +65,82 @@ async def unbanhammer(client, message):
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['k', 'kick'], prefixes=config['config']['prefixes']))
 @log_errors
 async def kick(client, message):
-	pass
+	if await CheckAdmin(message):
+		entity = message.chat
+		command = message.command
+		command.pop(0)
+		chat_id = message.chat.id
+		entity_id = command
+		reason = ""
 
-@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['testtest'], prefixes=config['config']['prefixes']))
-@log_errors
-@public_log_errors
-async def delete(client, message):
-    messages = set((message.message_id,))
-    reply = message.reply_to_message
-    if not getattr(reply, 'empty', True):
-        messages.add(reply.message_id)
-    else:
-        async for i in client.iter_history(message.chat.id, offset=1):
-            if i.outgoing:
-                messages.add(i.message_id)
-                break
-    await client.delete_messages(message.chat.id, messages)
+		if len(command) >= 2:
+			# -1001450488581 @rDakotaBot lel some optional reason
+			try:
+				noob = int(command[0])
+				if noob > 0:
+					entity_id = noob
+				else:
+					chat_id = noob
+			except ValueError:
+				# assume it's a channel name.
+				chat_id = noob
+			
+			# now for arg 2
+			try:
+				noob = int(command[1])
+				if noob > 0:
+					entity_id = noob
+				else:
+					chat_id = noob
+			except ValueError:
+				# assume it's an entity name.
+				entity_id = noob
+
+			if len(command) > 2:
+				reason = " ".join(command[2:])
+
+		elif len(command) == 1:
+			entity_id = command[0]
+		elif not getattr(message.reply_to_message, 'empty', True):
+			entity_id = message.reply_to_message.from_user.id
+			chat_id = message.reply_to_message.chat.id
+		else:
+			# what the fuck
+			pass
+
+		# Attempt to resolve
+		entity_id, entity_client = await get_entity(client, entity_id)
+		chat_id, chat_client = await get_entity(client, chat_id)
+
+		await client.kick_chat_member(
+			chat_id=chat_id.id,
+			user_id=entity_id.id
+		)
+
+		# log if we successfully kicked someone.
+		chat_name = html.escape(chat_id.title)
+		if message.chat.username:
+			chat_name = f'<a href="https://t.me/{chat_id.username}">{chat_name}</a>'
+
+		chat_text = '<b>Kick Event</b>\n- <b>Chat:</b>' + chat_name + '\n- <b>Kicked:</b> '
+		user_text = entity_id.first_name
+		if entity_id.last_name:
+			user_text += f' {entity_id.last_name}'
+		user_text = html.escape(user_text or 'Empty???')
+		if entity_id.is_verified:
+			user_text += ' <code>[VERIFIED]</code>'
+		if entity_id.is_support:
+			user_text += ' <code>[SUPPORT]</code>'
+		if entity_id.is_scam:
+			user_text += ' <code>[SCAM]</code>'
+			user_text += f' [<code>{entity_id.id}</code>]'
+		chat_text += f'{user_text}\n- <b>Reason:</b> {html.escape(reason.strip()[:1000])}'
+
+		await log_chat(chat_text)
+	else:
+		await log_chat(f'You do not have permission to kick in <a href=\"https://t.me/{message.chat.username}">{html.escape(message.chat.title)}</a>')
 
 help_dict['delete'] = ('Moderation',
-'''{prefix}delete <i>(maybe reply to a message)</i> - Deletes the replied to message, or your latest message
-Aliases: {prefix}d, {prefix}del
-
-{prefix}selfyeetpurge <i>(as reply to a message)</i> - {prefix}yp but only your messages
-Aliases: {prefix}syp''')
+'''{prefix}kick <i>[channel id|user id] [user id]</i> - Deletes the replied to message, or user's location based on optional channel id and user id
+Aliases: {prefix}k
+''')
