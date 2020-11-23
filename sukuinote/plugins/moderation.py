@@ -117,6 +117,9 @@ async def kick(client, message):
 			user_id=entity_id.id
 		)
 
+		# delete our kick command so pajeets don't try and run it themselves
+		await message.delete()
+
 		# log if we successfully kicked someone.
 		chat_name = html.escape(chat_id.title)
 		if message.chat.username:
@@ -140,7 +143,7 @@ async def kick(client, message):
 	else:
 		await log_chat(f'You do not have permission to kick in <a href=\"https://t.me/{message.chat.username}">{html.escape(message.chat.title)}</a>')
 
-help_dict['delete'] = ('Moderation',
+help_dict['moderation'] = ('Moderation',
 '''{prefix}kick <i>[channel id|user id] [user id]</i> - Deletes the replied to message, or user's location based on optional channel id and user id
 Aliases: {prefix}k
 ''')

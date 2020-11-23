@@ -13,11 +13,11 @@ async def pin_message(client, message: Message):
     # First of all check if its a group or not
     if message.chat.type in ["group", "supergroup"]:
         # Here lies the sanity checks
-        admins = await Client.get_chat_members(
+        admins = await client.get_chat_members(
             message.chat.id, filter=ChatMemberFilters.ADMINISTRATORS
         )
         admin_ids = [user.user.id for user in admins]
-        me = await Client.get_me()
+        me = await client.get_me()
 
         # If you are an admin
         if me.id in admin_ids:
@@ -34,23 +34,23 @@ async def pin_message(client, message: Message):
                     disable_notification = False
 
                 # Pin the fucking message.
-                await Client.pin_chat_message(
+                await client.pin_chat_message(
                     message.chat.id,
                     message.reply_to_message.message_id,
                     disable_notification=disable_notification,
                 )
-                await message.edit("`Pinned message!`")
+                await message.edit("<code>Pinned message!</code>")
             else:
                 # You didn't reply to a message and we can't pin anything. ffs
                 await message.edit(
-                    "`Reply to a message so that I can pin the god damned thing...`"
+                    "<code>Reply to a message so that I can pin the god damned thing...</code>"
                 )
         else:
             # You have no business running this command.
-            await message.edit("`I am not an admin here lmao. What am I doing?`")
+            await message.edit("<code>I am not an admin here lmao. What am I doing?</code>")
     else:
         # Are you fucking dumb this is not a group ffs.
-        await message.edit("`This is not a place where I can pin shit.`")
+        await message.edit("<code>This is not a place where I can pin shit.</code>")
 
     # And of course delete your lame attempt at changing the group picture.
     # RIP you.
@@ -59,5 +59,5 @@ async def pin_message(client, message: Message):
     await asyncio.sleep(3)
     await message.delete()
 
-help_dict['delete'] = ('Pin',
+help_dict['pin'] = ('Pin',
 '''{prefix}pin <i>(maybe reply to a message)</i> - Pins the replied to message''')
