@@ -1,14 +1,79 @@
-import html
+import html, time
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
-from .. import config, help_dict, log_errors, public_log_errors
+from .. import config, help_dict, log_errors, get_entity, log_chat
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['block'], prefixes=config['config']['prefixes']))
 @log_errors
 async def block(client, message):
-	pass
+	entity = message.chat
+	command = message.command
+	command.pop(0)
+	if command:
+		entity = ' '.join(command)
+	elif not getattr(message.reply_to_message, 'empty', True):
+		entity = message.reply_to_message.from_user or message.reply_to_message.chat
+	entity, entity_client = await get_entity(client, entity)
+
+	if not command and entity.type != "private":
+		await message.edit(f"<code>I can't block {entity.title} because it's not a private chat you retard</code>")
+		time.sleep(2)
+		await message.delete()
+		return
+
+	try:
+		if await client.block_user(entity.id):
+			user_text = entity.first_name
+			if entity.last_name:
+				user_text += f' {entity.last_name}'
+			user_text = html.escape(user_text or 'Empty???')
+			user_text += f' <code>[{entity.id}]</code>'
+			await log_chat("<b>User Block Event</b>\n- <b>User:</b> " + user_text)
+		else:
+			await message.edit(f"<code>I cannot block {entity.title}</code>")
+			time.sleep(2)
+	except:
+		await message.edit(f"<code>I cannot block {entity.title}</code>")
+		time.sleep(2)
+
+	await message.delete()
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['unblock'], prefixes=config['config']['prefixes']))
 @log_errors
 async def unblock(client, message):
-	pass
+	entity = message.chat
+	command = message.command
+	command.pop(0)
+	if command:
+		entity = ' '.join(command)
+	elif not getattr(message.reply_to_message, 'empty', True):
+		entity = message.reply_to_message.from_user or message.reply_to_message.chat
+	entity, entity_client = await get_entity(client, entity)
+
+	if not command and entity.type != "private":
+		await message.edit(f"<code>I can't unblock {entity.title} because it's not a private chat you retard</code>")
+		time.sleep(2)
+		await message.delete()
+		return
+
+	try:
+		if await client.unblock_user(entity.id):
+			user_text = entity.first_name
+			if entity.last_name:
+				user_text += f' {entity.last_name}'
+			user_text = html.escape(user_text or 'Empty???')
+			user_text += f' <code>[{entity.id}]</code>'
+			await log_chat("<b>User Unblock Event</b>\n- <b>User:</b> " + user_text)
+		else:
+			await message.edit(f"<code>I cannot unblock {entity.title}</code>")
+			time.sleep(2)
+	except:
+		await message.edit(f"<code>I cannot unblock {entity.title}</code>")
+		time.sleep(2)
+	await message.delete()
+
+help_dict['block'] = ('Block',
+'''{prefix}block <i>[user id]</i> - Blocks the user either by reply or by id
+
+{prefix}unblock <i>[user id]</i> - Unblocks the user either by reply or by id
+''')
