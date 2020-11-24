@@ -1,4 +1,4 @@
-import html
+import html, asyncio
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
 from .. import config, help_dict, get_entity, log_chat, log_errors, CheckAdmin
@@ -65,6 +65,13 @@ async def unbanhammer(client, message):
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['k', 'kick'], prefixes=config['config']['prefixes']))
 @log_errors
 async def kick(client, message):
+
+	if message.chat.type in ["group", "supergroup"]:
+		await message.edit("<code>How am I supposed to kick in a damn private chat?</code>")
+		await asyncio.sleep(3)
+		await message.delete()
+		return
+
 	if await CheckAdmin(message):
 		entity = message.chat
 		command = message.command
@@ -125,10 +132,10 @@ async def kick(client, message):
 		if message.chat.username:
 			chat_name = f'<a href="https://t.me/{chat_id.username}">{chat_name}</a>'
 
-		chat_text = '<b>Kick Event</b>\n- <b>Chat:</b>' + chat_name + '\n- <b>Kicked:</b> '
+		chat_text = '<b>Kick Event</b>\n- <b>Chat:</b> ' + chat_name + '\n- <b>Kicked:</b> '
 		user_text = entity_id.first_name
 		if entity_id.last_name:
-			user_text += f' {entity_id.last_name}'
+			user_text += f' {entity_id.last_name} <code>[{entity.id}]</code>'
 		user_text = html.escape(user_text or 'Empty???')
 		if entity_id.is_verified:
 			user_text += ' <code>[VERIFIED]</code>'
@@ -140,8 +147,6 @@ async def kick(client, message):
 		chat_text += f'{user_text}\n- <b>Reason:</b> {html.escape(reason.strip()[:1000])}'
 
 		await log_chat(chat_text)
-	else:
-		await log_chat(f'You do not have permission to kick in <a href=\"https://t.me/{message.chat.username}">{html.escape(message.chat.title)}</a>')
 
 help_dict['moderation'] = ('Moderation',
 '''{prefix}kick <i>[channel id|user id] [user id]</i> - Deletes the replied to message, or user's location based on optional channel id and user id
