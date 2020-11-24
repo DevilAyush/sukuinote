@@ -66,87 +66,102 @@ async def unbanhammer(client, message):
 @log_errors
 async def kick(client, message):
 
-	if message.chat.type in ["group", "supergroup"]:
+	if not message.chat.type in ["group", "supergroup"]:
 		await message.edit("<code>How am I supposed to kick in a damn private chat?</code>")
 		await asyncio.sleep(3)
 		await message.delete()
 		return
-
-	if await CheckAdmin(message):
-		entity = message.chat
-		command = message.command
-		command.pop(0)
-		chat_id = message.chat.id
-		entity_id = command
-		reason = ""
-
-		if len(command) >= 2:
-			# -1001450488581 @rDakotaBot lel some optional reason
-			try:
-				noob = int(command[0])
-				if noob > 0:
-					entity_id = noob
-				else:
-					chat_id = noob
-			except ValueError:
-				# assume it's a channel name.
-				chat_id = noob
-			
-			# now for arg 2
-			try:
-				noob = int(command[1])
-				if noob > 0:
-					entity_id = noob
-				else:
-					chat_id = noob
-			except ValueError:
-				# assume it's an entity name.
-				entity_id = noob
-
-			if len(command) > 2:
-				reason = " ".join(command[2:])
-
-		elif len(command) == 1:
-			entity_id = command[0]
-		elif not getattr(message.reply_to_message, 'empty', True):
-			entity_id = message.reply_to_message.from_user.id
-			chat_id = message.reply_to_message.chat.id
-		else:
-			# what the fuck
-			pass
-
-		# Attempt to resolve
-		entity_id, entity_client = await get_entity(client, entity_id)
-		chat_id, chat_client = await get_entity(client, chat_id)
-
-		await client.kick_chat_member(
-			chat_id=chat_id.id,
-			user_id=entity_id.id
-		)
-
-		# delete our kick command so pajeets don't try and run it themselves
+	
+	if not await CheckAdmin(message):
+		await message.edit("<code>I am not an admin here lmao. What am I doing?</code>")
+		await asyncio.sleep(3)
 		await message.delete()
+		return
 
-		# log if we successfully kicked someone.
-		chat_name = html.escape(chat_id.title)
-		if message.chat.username:
-			chat_name = f'<a href="https://t.me/{chat_id.username}">{chat_name}</a>'
+	entity = message.chat
+	command = message.command
+	command.pop(0)
+	chat_id = message.chat.id
+	entity_id = command
+	reason = ""
 
-		chat_text = '<b>Kick Event</b>\n- <b>Chat:</b> ' + chat_name + '\n- <b>Kicked:</b> '
-		user_text = entity_id.first_name
-		if entity_id.last_name:
-			user_text += f' {entity_id.last_name} <code>[{entity.id}]</code>'
-		user_text = html.escape(user_text or 'Empty???')
-		if entity_id.is_verified:
-			user_text += ' <code>[VERIFIED]</code>'
-		if entity_id.is_support:
-			user_text += ' <code>[SUPPORT]</code>'
-		if entity_id.is_scam:
-			user_text += ' <code>[SCAM]</code>'
-			user_text += f' [<code>{entity_id.id}</code>]'
-		chat_text += f'{user_text}\n- <b>Reason:</b> {html.escape(reason.strip()[:1000])}'
+	if len(command) >= 2:
+		# -1001450488581 @rDakotaBot lel some optional reason
+		try:
+			noob = int(command[0])
+			if noob > 0:
+				entity_id = noob
+			else:
+				chat_id = noob
+		except ValueError:
+			# assume it's a channel name.
+			chat_id = command[0]
+		
+		# now for arg 2
+		try:
+			noob = int(command[1])
+			if noob > 0:
+				entity_id = noob
+			else:
+				chat_id = noob
+		except ValueError:
+			# assume it's an entity name.
+			entity_id = command[1]
 
-		await log_chat(chat_text)
+		if len(command) > 2:
+			reason = " ".join(command[2:])
+
+	elif len(command) == 1:
+		entity_id = command[0]
+	elif not getattr(message.reply_to_message, 'empty', True):
+		entity_id = message.reply_to_message.from_user.id
+		chat_id = message.reply_to_message.chat.id
+	else:
+		# what the fuck
+		await message.edit("<code>wtf are you trying to do??</code>")
+		await asyncio.sleep(3)
+		await message.delete()
+		return
+
+	# Attempt to resolve
+	entity_id, entity_client = await get_entity(client, entity_id)
+	chat_id, chat_client = await get_entity(client, chat_id)
+
+	# make sure the user isn't an idiot.
+	if entity_id.type != "private" or not chat_id.type in ["group", "supergroup"]:
+		await message.edit("<code>You're doing something dumb. Stop it. Get some help!</code>")
+		await asyncio.sleep(3)
+		await message.delete()
+		return
+
+	await client.kick_chat_member(
+		chat_id=chat_id.id,
+		user_id=entity_id.id
+	)
+
+	# delete our kick command so pajeets don't try and run it themselves
+	await message.delete()
+
+	# log if we successfully kicked someone.
+	chat_name = html.escape(chat_id.title)
+	if message.chat.username:
+		chat_name = f'<a href="https://t.me/{chat_id.username}">{chat_name}</a>'
+
+	chat_text = '<b>Kick Event</b>\n- <b>Chat:</b> ' + chat_name + '\n- <b>Kicked:</b> '
+	user_text = entity_id.first_name
+	if entity_id.last_name:
+		user_text += f' {entity_id.last_name} <code>[{entity.id}]</code>'
+	user_text = html.escape(user_text or 'Empty???')
+	if entity_id.is_verified:
+		user_text += ' <code>[VERIFIED]</code>'
+	if entity_id.is_support:
+		user_text += ' <code>[SUPPORT]</code>'
+	if entity_id.is_scam:
+		user_text += ' <code>[SCAM]</code>'
+		user_text += f' [<code>{entity_id.id}</code>]'
+	chat_text += f'{user_text}\n- <b>Reason:</b> {html.escape(reason.strip()[:1000])}'
+
+	await log_chat(chat_text)
 
 help_dict['moderation'] = ('Moderation',
 '''{prefix}kick <i>[channel id|user id] [user id]</i> - Deletes the replied to message, or user's location based on optional channel id and user id
