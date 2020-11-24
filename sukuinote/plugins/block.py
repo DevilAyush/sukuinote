@@ -1,4 +1,4 @@
-import html, time
+import html, asyncio
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
 from .. import config, help_dict, log_errors, get_entity, log_chat
@@ -17,7 +17,7 @@ async def block(client, message):
 
 	if not command and entity.type != "private":
 		await message.edit(f"<code>I can't block {entity.title} because it's not a private chat you retard</code>")
-		time.sleep(2)
+		await asyncio.sleep(3)
 		await message.delete()
 		return
 
@@ -31,10 +31,10 @@ async def block(client, message):
 			await log_chat("<b>User Block Event</b>\n- <b>User:</b> " + user_text)
 		else:
 			await message.edit(f"<code>I cannot block {entity.title}</code>")
-			time.sleep(2)
+			await asyncio.sleep(3)
 	except:
 		await message.edit(f"<code>I cannot block {entity.title}</code>")
-		time.sleep(2)
+		await asyncio.sleep(3)
 
 	await message.delete()
 
@@ -52,7 +52,7 @@ async def unblock(client, message):
 
 	if not command and entity.type != "private":
 		await message.edit(f"<code>I can't unblock {entity.title} because it's not a private chat you retard</code>")
-		time.sleep(2)
+		await asyncio.sleep(3)
 		await message.delete()
 		return
 
@@ -66,10 +66,10 @@ async def unblock(client, message):
 			await log_chat("<b>User Unblock Event</b>\n- <b>User:</b> " + user_text)
 		else:
 			await message.edit(f"<code>I cannot unblock {entity.title}</code>")
-			time.sleep(2)
+			await asyncio.sleep(3)
 	except:
 		await message.edit(f"<code>I cannot unblock {entity.title}</code>")
-		time.sleep(2)
+		await asyncio.sleep(3)
 	await message.delete()
 
 help_dict['block'] = ('Block',
