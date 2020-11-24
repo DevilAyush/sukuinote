@@ -102,7 +102,7 @@ async def CheckAdmin(message: Message):
     )
 
     if SELF.status not in ranks:
-        await message.edit("__I'm not Admin!__")
+        await message.edit("<code>I am not an admin here lmao. What am I doing?</code>")
         sleep(2)
         await message.delete()
 
@@ -110,7 +110,7 @@ async def CheckAdmin(message: Message):
         if SELF.status is not admin or SELF.can_restrict_members:
             return True
         else:
-            await message.edit("__No Permissions to restrict Members__")
+            await message.edit("<code>No Permissions to restrict Members</code>")
             sleep(2)
             await message.delete()
 
@@ -124,13 +124,13 @@ def log_errors(func):
         except Exception:
             tb = traceback.format_exc()
             try:
-                await slave.send_message(config['config']['log_chat'], f'Exception occured in {func.__name__}\n\n{tb}', parse_mode=None)
+                await slave.send_message(config['config']['log_chat'], f'Exception occured in <code>{func.__name__}\n\n{html.escape(tb)}</code>', disable_web_page_preview=True)
             except Exception:
                 logging.exception('Failed to log exception for %s as slave', func.__name__)
                 tb = traceback.format_exc()
                 for app in apps:
                     try:
-                        await app.send_message(config['config']['log_chat'], f'Exception occured in {func.__name__}\n\n{tb}', parse_mode=None)
+                        await app.send_message(config['config']['log_chat'], f'Exception occured in <code>{func.__name__}\n\n{html.escape(tb)}</code>', disable_web_page_preview=True)
                     except Exception:
                         logging.exception('Failed to log exception for %s as app', func.__name__)
                         tb = traceback.format_exc()
@@ -148,7 +148,7 @@ def public_log_errors(func):
         except (StopPropagation, ContinuePropagation):
             raise
         except Exception:
-            await message.reply_text(traceback.format_exc(), parse_mode=None)
+            await message.reply_text("<code>" + html.escape(traceback.format_exc()) + "</code>", disable_web_page_preview=True)
             raise
     return wrapper
 
