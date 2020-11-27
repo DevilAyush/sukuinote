@@ -91,6 +91,14 @@ async def get_user(client, entity):
 async def log_chat(message):
     await slave.send_message(config['config']['log_chat'], message, disable_web_page_preview=True)
 
+async def is_admin(client, message, entity):
+    # Here lies the sanity checks
+    admins = await client.get_chat_members(
+        message.chat.id, filter=ChatMemberFilters.ADMINISTRATORS
+    )
+    admin_ids = [user.user.id for user in admins]
+    return entity.id in admin_ids
+
 async def CheckAdmin(message: Message):
     """Check if we are an admin."""
     admin = "administrator"
