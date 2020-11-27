@@ -12,6 +12,7 @@ config:
     log_chat: -1001278205033
     spamwatch_api: https://t.me/SpamWatchBot
     owlantispam_api: https://t.me/OwlAntiSpam
+    timezone: America/Los_Angeles
     log_user_joins: false
     log_user_adds: true
     log_reports: true

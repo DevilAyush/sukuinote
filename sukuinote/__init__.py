@@ -92,6 +92,11 @@ async def get_user(client, entity):
 async def log_chat(message):
     await slave.send_message(config['config']['log_chat'], message, disable_web_page_preview=True)
 
+async def self_destruct(message, text):
+    await message.edit(text)
+    await asyncio.sleep(3)
+    await message.delete()
+
 async def is_admin(client, message, entity):
     # Here lies the sanity checks
     admins = await client.get_chat_members(
