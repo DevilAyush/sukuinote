@@ -59,5 +59,49 @@ async def pin_message(client, message: Message):
     await asyncio.sleep(3)
     await message.delete()
 
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['unpin', 'unpinall'], prefixes=config['config']['prefixes']))
+@log_errors
+async def unpin_message(client, message: Message):
+    # First of all check if its a group or not
+    if message.chat.type in ["group", "supergroup"]:
+        # Here lies the sanity checks
+        admins = await client.get_chat_members(
+            message.chat.id, filter=ChatMemberFilters.ADMINISTRATORS
+        )
+        admin_ids = [user.user.id for user in admins]
+        me = await client.get_me()
+
+        # If you are an admin
+        if me.id in admin_ids:
+            # If you replied to a message so that we can unpin it.
+            if message.reply_to_message:
+
+                # unpin the fucking message.
+                await client.unpin_chat_message(
+                    message.chat.id,
+                    message.reply_to_message.message_id
+                )
+                await message.edit("<code>Unpinned message!</code>")
+            else:
+                # You didn't reply to a message and we can't unpin anything. ffs
+                await message.edit(
+                    "<code>Reply to a message so that I can unpin the god damned thing...</code>"
+                )
+        else:
+            # You have no business running this command.
+            await message.edit("<code>I am not an admin here lmao. What am I doing?</code>")
+    else:
+        # Are you fucking dumb this is not a group ffs.
+        await message.edit("<code>This is not a place where I can unpin shit.</code>")
+
+    # And of course delete your lame attempt at changing the group picture.
+    # RIP you.
+    # You're probably gonna get ridiculed by everyone in the group for your failed attempt.
+    # RIP.
+    await asyncio.sleep(3)
+    await message.delete()
+
 help_dict['pin'] = ('Pin',
-'''{prefix}pin <i>(maybe reply to a message)</i> - Pins the replied to message''')
+'''{prefix}pin <i>(maybe reply to a message)</i> - Pins the replied message
+
+{prefix}unpin <i>(maybe reply to a message)</i> - Unpins the replied message''')

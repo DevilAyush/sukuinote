@@ -12,6 +12,7 @@ from datetime import timedelta
 from pyrogram import Client, StopPropagation, ContinuePropagation
 from pyrogram.types import Chat, User, Message
 from pyrogram.parser import parser
+from pyrogram.methods.chats.get_chat_members import Filters as ChatMemberFilters
 from pyrogram.errors.exceptions.bad_request_400 import PeerIdInvalid, ChannelInvalid
 
 logging.basicConfig(level=logging.INFO)
@@ -98,6 +99,75 @@ async def is_admin(client, message, entity):
     )
     admin_ids = [user.user.id for user in admins]
     return entity.id in admin_ids
+
+async def _ParseCommandArguments(client, message):
+	""" Parse command arguments in the following order:
+		1. If the message is a reply, assume entity_id is the replied to user
+		2. Attempt to find the 1st and 2nd argument as a chat and/or user
+		3. if none of the above conditions succeed, treat it all as reason text.
+
+		if the chat ID is missing then assume the current chat the message was in.
+	"""
+	command = message.command
+	command.pop(0)
+	chat_id = message.chat.id
+	entity_id = None
+	reason = ""
+	reasonstart = 0
+
+	# Always assume the replied-to message is the intended user
+	if not getattr(message.reply_to_message, 'empty', True):
+		entity_id = message.reply_to_message.from_user.id
+
+	entity0 = entity1 = None
+
+	if len(command) >= 1:
+		try:
+			entity0, entit0_client = await get_entity(client, command[0])
+
+			if type(entity0) != type(command[0]):
+				if entity0.type in ["group", 'supergroup']:
+					chat_id = entity0.id
+				elif not entity_id:
+					entity_id = entity0.id
+				reasonstart += 1
+		except:
+			pass
+
+		# only try to resolve the 2nd argument if we still don't have
+		# the entity that we want to perform the action on.
+		if len(command) >= 2 and not entity_id:
+			try:
+				entity1, entity1_client = await get_entity(client, command[1])
+				if type(entity1) != type(command[1]):
+					if not entity1.type in ["group", "supergroup"] and not entity_id:
+						entity_id = entity1.id
+						reasonstart += 1
+			except:
+				pass
+
+	# we've resolved the entity_id and chat_id, lets get the reason.
+	if command:
+		reason = " ".join(command[reasonstart:])
+
+	# validate we actually have everything resolved
+	if not chat_id or not entity_id:
+		await message.edit("<code>wtf are you trying to do??</code>")
+		await asyncio.sleep(3)
+		await message.delete()
+		return None
+
+	entity_id, entity_client = await get_entity(client, entity_id)
+	chat_id, chat_client = await get_entity(client, chat_id)
+
+	# make sure the user isn't an idiot.
+	if not entity_id.type in ["private", "bot"] or not chat_id.type in ["group", "supergroup"]:
+		await message.edit(f"<code>You're doing something dumb. Stop it. Get some help! {entity_id.type} - {chat_id.type}</code>")
+		await asyncio.sleep(3)
+		await message.delete()
+		return None
+
+	return chat_id, entity_id, reason
 
 async def CheckAdmin(message: Message):
     """Check if we are an admin."""
