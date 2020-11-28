@@ -2,6 +2,9 @@ telegram:
     api_id: 0
     api_hash: https://my.telegram.org
     slave_bot_token: https://t.me/BotFather
+sql:
+    # See: https://docs.sqlalchemy.org/en/14/core/engines.html
+    uri: postgresql://scott:tiger@localhost:5432/mydatabase
 config:
     prefixes:
         - .
@@ -9,7 +12,7 @@ config:
         - blankie
         - knees
         - nezuko
-    log_chat: -1001278205033
+    log_chat: -1000000000000
     spamwatch_api: https://t.me/SpamWatchBot
     owlantispam_api: https://t.me/OwlAntiSpam
     timezone: America/Los_Angeles

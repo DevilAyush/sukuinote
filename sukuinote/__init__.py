@@ -7,7 +7,6 @@ import traceback
 import functools
 import yaml
 import aiohttp
-from time import sleep
 from datetime import timedelta
 from pyrogram import Client, StopPropagation, ContinuePropagation
 from pyrogram.types import Chat, User, Message
@@ -15,27 +14,40 @@ from pyrogram.parser import parser
 from pyrogram.methods.chats.get_chat_members import Filters as ChatMemberFilters
 from pyrogram.errors.exceptions.bad_request_400 import PeerIdInvalid, ChannelInvalid
 
-logging.basicConfig(level=logging.INFO)
-with open('config.yaml') as config:
-    config = yaml.safe_load(config)
+# Globals.
 loop = asyncio.get_event_loop()
 help_dict = dict()
-
 apps = []
 app_user_ids = dict()
+DB_AVAILABLE = False
+
 # this code here exists because i can't be fucked
 class Parser(parser.Parser):
     async def parse(self, text, mode):
         if mode == 'through':
             return text
         return await super().parse(text, mode)
+
+#################
+# Sukuinote main
+#
+logging.basicConfig(level=logging.INFO)
+with open('config.yaml') as c:
+    config = yaml.safe_load(c)
+
+# Init the database
+from . import database
+DB_AVAILABLE = database.innit()
+
 for session_name in config['config']['sessions']:
     app = Client(session_name, api_id=config['telegram']['api_id'], api_hash=config['telegram']['api_hash'], plugins={'root': os.path.join(__package__, 'plugins')}, parse_mode='html', workdir='sessions')
     app.parser = Parser(app)
     apps.append(app)
+
 slave = Client('sukuinote-slave', api_id=config['telegram']['api_id'], api_hash=config['telegram']['api_hash'], plugins={'root': os.path.join(__package__, 'slave-plugins')}, parse_mode='html', bot_token=config['telegram']['slave_bot_token'], workdir='sessions')
 slave.parser = Parser(slave)
 session = aiohttp.ClientSession()
+###############
 
 async def get_entity(client, entity):
     entity_client = client
@@ -88,6 +100,13 @@ async def get_user(client, entity):
                 entity = await slave.get_users(entity)
                 entity_client = slave
     return entity, entity_client
+
+async def get_app(id):
+    for app in apps:
+        me = await app.get_me()
+        if me.id == id:
+            return app
+    return None
 
 async def log_chat(message):
     await slave.send_message(config['config']['log_chat'], message, disable_web_page_preview=True)
@@ -186,7 +205,7 @@ async def CheckAdmin(message: Message):
 
     if SELF.status not in ranks:
         await message.edit("<code>I am not an admin here lmao. What am I doing?</code>")
-        sleep(2)
+        await asyncio.sleep(3)
         await message.delete()
 
     else:
@@ -194,7 +213,7 @@ async def CheckAdmin(message: Message):
             return True
         else:
             await message.edit("<code>No Permissions to restrict Members</code>")
-            sleep(2)
+            await asyncio.sleep(2)
             await message.delete()
 
 def log_errors(func):

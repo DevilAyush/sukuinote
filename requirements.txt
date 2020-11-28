@@ -7,3 +7,5 @@ PyYAML
 CurrencyConverter
 arrow
 pillow
+sqlalchemy
+#SQLAlchemy-Utils
