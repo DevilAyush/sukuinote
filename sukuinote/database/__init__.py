@@ -65,14 +65,32 @@ def innit():
 	return True
 
 def get_sticker_set(user_id):
-	pass
+	try:
+		return session.query(StickerSet).get(user_id)
+	finally:
+		session.close()
 
 def get_animated_set(user_id):
-	pass
+	try:
+		return session.query(AnimatedStickerSet).get(user_id)
+	finally:
+		session.close()
 
 def set_sticker_set(user_id, text):
-	pass
+	query = session.query(StickerSet).get(user_id)
+	if query:
+		session.delete(query)
+	query = StickerSet(user_id, text)
+	print(f"Setting sticker pack for {user_id} to {text}: {query}")
+	session.add(query)
+	session.commit()
 
 def set_animated_set(user_id, text):
-	pass
+	query = session.query(AnimatedStickerSet).get(user_id)
+	if query:
+		session.delete(query)
+	print(f"Setting animated sticker pack for {user_id} to {text}")
+	query = AnimatedStickerSet(user_id, text)
+	session.add(query)
+	session.commit()
 

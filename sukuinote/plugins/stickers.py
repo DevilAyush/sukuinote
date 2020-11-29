@@ -1,7 +1,8 @@
+# Mostly kanged from https://github.com/pokurt/Nana-Remix/blob/master/nana/modules/stickers.py
+
 import math, os, asyncio
 from PIL import Image
-from .. import slave, config, help_dict, get_entity, log_chat, log_errors, self_destruct, DB_AVAILABLE
-from ..database import get_sticker_set, get_animated_set
+from .. import slave, config, help_dict, get_entity, log_chat, log_errors, self_destruct, DB_AVAILABLE, database
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram import filters, Client
 
@@ -14,8 +15,8 @@ async def kang_stickers(client, message):
 		await self_destruct(message, "<code>Your database is not avaiable!</code>")
 		return
 
-	sticker_pack = get_sticker_set(message.from_user.id)
-	animation_pack = get_animated_set(message.from_user.id)
+	sticker_pack = database.get_sticker_set(message.from_user.id)
+	animation_pack = database.get_animated_set(message.from_user.id)
 	if not sticker_pack:
 		await slave.send_message(message.from_user.id,
 								  "Looks like want to kang a sticker, but a sticker pack was not set!\n"
@@ -42,6 +43,8 @@ async def kang_stickers(client, message):
 	else:
 		await self_destruct(message, f"Reply with a sticker or photo to kang it!\nCurrent sticker pack is: {sticker_pack}\nCurrent animation pack is: {animation_pack.sticker}")
 		return
+	
+	await message.edit("<code>That's a nice sticker you sent in chat, I'm gonna kang it to my kang pack!</code>")
 	
 	if ((message.reply_to_message.sticker and message.reply_to_message.sticker.mime_type)) != "application/x" "-tgsticker":
 		im = Image.open("cache/sticker.png")
@@ -96,12 +99,13 @@ async def kang_stickers(client, message):
 	elif message.reply_to_message.sticker:
 		ic = message.reply_to_message.sticker.emoji
 	else:
-		ic = "🤔"
+		ic = "\N{thinking face}"
 
 	await client.send_message("@Stickers", ic)
 	await asyncio.sleep(1)
 	await client.send_message("@Stickers", "/done")
 
+	await client.delete_messages("@Stickers", [ms.message_id for ms in await client.get_history("@Stickers", limit=10)])
 	if message.reply_to_message.sticker and message.reply_to_message.sticker.mime_type == "application/x-tgsticker":
 		await self_destruct(message, f'<code>Kanged! Your pack is <a href="https://t.me/addstickers/{animation_pack.sticker}">here</a>.')
 	else:
