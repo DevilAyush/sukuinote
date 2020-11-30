@@ -1,6 +1,7 @@
 import asyncio, arrow
 from currency_converter import CurrencyConverter
 from pyrogram import Client, filters
+from unitconvert import lengthunits, massunits, volumeunits
 from .. import config, help_dict, get_entity, log_chat, log_errors, self_destruct
 
 c = CurrencyConverter()
@@ -34,6 +35,53 @@ async def currency(client, message):
 	except ValueError as err:
 		await self_destruct(message, f"<code>{str(err)}</code>")
 
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['length'], prefixes=config['config']['prefixes']))
+@log_errors
+async def currency(client, message):
+	if len(message.command) <= 3:
+		await self_destruct(message, "<code>Incorrect Syntax</code>")
+		return
+
+	value = message.command[1]
+	curr1 = message.command[2].lower()
+	curr2 = message.command[3].lower()
+	try:
+		conv = lengthunits.LengthUnit(float(value), curr1, curr2).doconvert()
+		await message.edit(f"<code>{value} {curr1} = {conv:,.2f} {curr2}</code>")
+	except ValueError as err:
+		await self_destruct(message, f"<code>{str(err)}</code>")
+
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['mass'], prefixes=config['config']['prefixes']))
+@log_errors
+async def currency(client, message):
+	if len(message.command) <= 3:
+		await self_destruct(message, "<code>Incorrect Syntax</code>")
+		return
+
+	value = message.command[1]
+	curr1 = message.command[2].lower()
+	curr2 = message.command[3].lower()
+	try:
+		conv = massunits.MassUnit(float(value), curr1, curr2).doconvert()
+		await message.edit(f"<code>{value} {curr1} = {conv:,.2f} {curr2}</code>")
+	except ValueError as err:
+		await self_destruct(message, f"<code>{str(err)}</code>")
+
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['vol', 'volume'], prefixes=config['config']['prefixes']))
+@log_errors
+async def currency(client, message):
+	if len(message.command) <= 3:
+		await self_destruct(message, "<code>Incorrect Syntax</code>")
+		return
+
+	value = message.command[1]
+	curr1 = message.command[2].lower()
+	curr2 = message.command[3].lower()
+	try:
+		conv = volumeunits.VolumeUnit(float(value), curr1, curr2).doconvert()
+		await message.edit(f"<code>{value} {curr1} = {conv:,.2f} {curr2}</code>")
+	except ValueError as err:
+		await self_destruct(message, f"<code>{str(err)}</code>")
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['temp'], prefixes=config['config']['prefixes']))
 @log_errors

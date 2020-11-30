@@ -9,4 +9,5 @@ arrow
 pillow
 sqlalchemy
 unidecode
+unitconvert
 #SQLAlchemy-Utils
