@@ -8,7 +8,6 @@ PROBLEM_CODES = set(i for i in googletrans.LANGUAGES if '-' in i)
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['tr', 'translate'], prefixes=config['config']['prefixes']))
 @log_errors
-@public_log_errors
 async def translate(client, message):
     reply = message.reply_to_message
     if getattr(reply, 'empty', True):

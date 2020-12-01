@@ -6,6 +6,7 @@ import asyncio
 from pyrogram import filters, Client
 from pyrogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from .. import slave, DB_AVAILABLE, app_user_ids, log_errors, get_app, database
+from ..database import session, StickerSet, AnimatedStickerSet
 
 TEMP_KEYBOARD = []
 USER_SET = {}
@@ -96,9 +97,20 @@ async def set_stickers(client, message):
 	if message.text in TEMP_KEYBOARD:
 		await client.delete_messages(message.chat.id, USER_SET[message.from_user.id])
 		if USER_SET["type"] == 1:
-			database.set_sticker_set(message.from_user.id, message.text)
+			sticker = session.query(StickerSet).get(message.from_user.id)
+			if sticker:
+				sticker.sticker = message.text
+			else:
+				sticker = StickerSet(message.from_user.id, message.text)
+				session.add(sticker)
 		elif USER_SET["type"] == 2:
-			database.set_animated_set(message.from_user.id, message.text)
+			sticker = session.query(AnimatedStickerSet).get(message.from_user.id)
+			if sticker:
+				sticker.sticker = message.text
+			else:
+				sticker = AnimatedStickerSet(message.from_user.id, message.text)
+				session.add(sticker)
+		session.commit()
 		status = "Ok, sticker was set to `{}`".format(message.text)
 	else:
 		status = "Invalid pack selected."

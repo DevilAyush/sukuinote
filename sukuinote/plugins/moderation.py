@@ -1,7 +1,7 @@
 import html, asyncio, time
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
-from .. import config, help_dict, get_entity, log_chat, log_errors, CheckAdmin, is_admin, _ParseCommandArguments
+from .. import config, help_dict, get_entity, log_chat, log_errors, CheckAdmin, is_admin, _ParseCommandArguments, self_destruct
 
 # Mute Permissions
 mute_permissions = ChatPermissions(
@@ -35,15 +35,11 @@ unmute_permissions = ChatPermissions(
 # Convenience functions
 async def _CheckGroupAndPerms(message):
 	if not message.chat.type in ["group", "supergroup"]:
-		await message.edit("<code>How am I supposed to do this in a damn private chat?</code>")
-		await asyncio.sleep(3)
-		await message.delete()
+		await self_destruct("<code>How am I supposed to do this in a damn private chat?</code>")
 		return False
 
 	if not await CheckAdmin(message):
-		await message.edit("<code>I am not an admin here lmao. What am I doing?</code>")
-		await asyncio.sleep(3)
-		await message.delete()
+		await self_destruct("<code>I am not an admin here lmao. What am I doing?</code>")
 		return False
 
 	return True
@@ -70,9 +66,7 @@ async def promote(client, message):
 			can_pin_messages=True,
 			can_promote_members=False
 		):
-			await message.edit("<code>I cannot promote that.</code>")
-			await asyncio.sleep(3)
-			await message.delete()
+			await self_destruct("<code>I cannot promote that.</code>")
 			return
 
 		# log if we successfully promoted someone.
@@ -157,9 +151,7 @@ async def demote(client, message):
 			can_pin_messages=False,
 			can_promote_members=False
 		):
-			await message.edit("<code>I cannot demote that.</code>")
-			await asyncio.sleep(3)
-			await message.delete()
+			await self_destruct("<code>I cannot demote that.</code>")
 			return
 
 		# log if we successfully demoted someone.
@@ -181,9 +173,7 @@ async def demote(client, message):
 			user_text += f' [<code>{entity_id.id}</code>]'
 
 		await log_chat(chat_text + user_text)
-		await message.edit(f'<a href="https://t.me/{entity_id.username}">{user}</a><code> is no longer king.</code>')
-		await asyncio.sleep(3)
-		await message.delete()
+		await self_destruct(f'<a href="https://t.me/{entity_id.username}">{user}</a><code> is no longer king.</code>')
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['m', 'mute'], prefixes=config['config']['prefixes']))
 @log_errors
@@ -197,9 +187,7 @@ async def mute(client, message):
 		chat_id, entity_id, reason = value
 
 		if is_admin(client, message, entity_id):
-			await message.edit("<code>lol they're admin u tart.</code>")
-			await asyncio.sleep(3)
-			await message.delete()
+			await self_destruct("<code>lol they're admin u tart.</code>")
 			return
 
 		if not await client.restrict_chat_member(
@@ -207,9 +195,7 @@ async def mute(client, message):
 			user_id=entity_id.id,
 			permissions=mute_permissions
 		):
-			await message.edit("<code>I cannot mute that.</code>")
-			await asyncio.sleep(3)
-			await message.delete()
+			await self_destruct("<code>I cannot mute that.</code>")
 			return
 
 		# log if we successfully kicked someone.
@@ -232,9 +218,7 @@ async def mute(client, message):
 		chat_text += f'{user_text}\n- <b>Reason:</b> {html.escape(reason.strip()[:1000])}'
 
 		await log_chat(chat_text)
-		await message.edit(f'<a href="https://t.me/{entity_id.username}">{user}</a><code>\'s enter key was removed.</code>')
-		await asyncio.sleep(3)
-		await message.delete()
+		await self_destruct(f'<a href="https://t.me/{entity_id.username}">{user}</a><code>\'s enter key was removed.</code>')
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['um', 'unmute'], prefixes=config['config']['prefixes']))
 @log_errors
@@ -247,9 +231,7 @@ async def unmute(client, message):
 		chat_id, entity_id, reason = value
 
 		if is_admin(client, message, entity_id):
-			await message.edit("<code>lol they're admin u tart.</code>")
-			await asyncio.sleep(3)
-			await message.delete()
+			await self_destruct("<code>lol they're admin u tart.</code>")
 			return
 
 		if not await client.restrict_chat_member(
@@ -257,9 +239,7 @@ async def unmute(client, message):
 			user_id=entity_id.id,
 			permissions=unmute_permissions
 		):
-			await message.edit("<code>I cannot unmute that.</code>")
-			await asyncio.sleep(3)
-			await message.delete()
+			await self_destruct("<code>I cannot unmute that.</code>")
 			return
 
 		# log if we successfully kicked someone.
@@ -282,9 +262,7 @@ async def unmute(client, message):
 		chat_text += f'{user_text}\n- <b>Reason:</b> {html.escape(reason.strip()[:1000])}'
 
 		await log_chat(chat_text)
-		await message.edit(f'<a href="https://t.me/{entity_id.username}">{user}</a> <code>can now spam.</code>')
-		await asyncio.sleep(3)
-		await message.delete()
+		await self_destruct(f'<a href="https://t.me/{entity_id.username}">{user}</a> <code>can now spam.</code>')
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['b', 'ban'], prefixes=config['config']['prefixes']))
 @log_errors
@@ -299,9 +277,7 @@ async def banhammer(client, message):
 		print(chat_id, "\n\n\n", entity_id)
 
 		if is_admin(client, message, entity_id):
-			await message.edit("<code>lol they're admin u tart.</code>")
-			await asyncio.sleep(3)
-			await message.delete()
+			await self_destruct("<code>lol they're admin u tart.</code>")
 			return
 
 		# TODO: timed bans
@@ -345,9 +321,7 @@ async def unbanhammer(client, message):
 		chat_id, entity_id, reason = value
 
 		if is_admin(client, message, entity_id):
-			await message.edit("<code>lol they're admin u tart.</code>")
-			await asyncio.sleep(3)
-			await message.delete()
+			await self_destruct("<code>lol they're admin u tart.</code>")
 			return
 
 		await client.unban_chat_member(
@@ -392,9 +366,7 @@ async def kick(client, message):
 		chat_id, entity_id, reason = value
 
 		if is_admin(client, message, entity_id):
-			await message.edit("<code>lol they're admin u tart.</code>")
-			await asyncio.sleep(3)
-			await message.delete()
+			await self_destruct("<code>lol they're admin u tart.</code>")
 			return
 
 		await client.kick_chat_member(

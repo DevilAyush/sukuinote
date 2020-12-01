@@ -37,7 +37,7 @@ async def currency(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['length'], prefixes=config['config']['prefixes']))
 @log_errors
-async def currency(client, message):
+async def length(client, message):
 	if len(message.command) <= 3:
 		await self_destruct(message, "<code>Incorrect Syntax</code>")
 		return
@@ -53,7 +53,7 @@ async def currency(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['mass'], prefixes=config['config']['prefixes']))
 @log_errors
-async def currency(client, message):
+async def mass(client, message):
 	if len(message.command) <= 3:
 		await self_destruct(message, "<code>Incorrect Syntax</code>")
 		return
@@ -69,7 +69,7 @@ async def currency(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['vol', 'volume'], prefixes=config['config']['prefixes']))
 @log_errors
-async def currency(client, message):
+async def volume(client, message):
 	if len(message.command) <= 3:
 		await self_destruct(message, "<code>Incorrect Syntax</code>")
 		return

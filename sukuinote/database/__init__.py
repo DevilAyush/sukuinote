@@ -1,6 +1,7 @@
 import os
 import sys
 from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, UnicodeText
+from sqlalchemy import ext
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from .. import config
@@ -35,6 +36,26 @@ class AnimatedStickerSet(Base):
 	def __repr__(self):
 		return f"<Sticker {self.id}>"
 
+class AutoScroll(Base):
+	__tablename__ = 'AutoScroll'
+	id = Column(Integer, primary_key=True)
+
+	def __init__(self, id):
+		self.id = id
+	
+	def __repr__(self):
+		return f"<AutoScroll {self.id}>"
+
+class AutoBanSpammers(Base):
+	__tablename__ = 'AutoBanSpammers'
+	id = Column(Integer, primary_key=True)
+
+	def __init__(self, id):
+		self.id = id
+	
+	def __repr__(self):
+		return f"<AutoBanSpammers {self.id}>"
+
 # For PM Permit
 # class AuthorizedUsers(Base):
 # 	__tablename__ = 'AuthorizedUsers'
@@ -55,13 +76,15 @@ def innit():
 	# Create the tables if they don't already exist
 	try:
 		Base.metadata.create_all(sqlengine)
-	except exc.OperationalError:
+	except ext.OperationalError:
 		return False
 
 	session = scoped_session(sessionmaker(bind=sqlengine, autoflush=False))
 	# Init the tables
 	StickerSet.__table__.create(checkfirst=True)
 	AnimatedStickerSet.__table__.create(checkfirst=True)
+	AutoScroll.__table__.create(checkfirst=True)
+	AutoBanSpammers.__table__.create(checkfirst=True)
 	return True
 
 def get_sticker_set(user_id):
@@ -75,22 +98,4 @@ def get_animated_set(user_id):
 		return session.query(AnimatedStickerSet).get(user_id)
 	finally:
 		session.close()
-
-def set_sticker_set(user_id, text):
-	query = session.query(StickerSet).get(user_id)
-	if query:
-		session.delete(query)
-	query = StickerSet(user_id, text)
-	print(f"Setting sticker pack for {user_id} to {text}: {query}")
-	session.add(query)
-	session.commit()
-
-def set_animated_set(user_id, text):
-	query = session.query(AnimatedStickerSet).get(user_id)
-	if query:
-		session.delete(query)
-	print(f"Setting animated sticker pack for {user_id} to {text}")
-	query = AnimatedStickerSet(user_id, text)
-	session.add(query)
-	session.commit()
 

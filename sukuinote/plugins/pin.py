@@ -102,6 +102,6 @@ async def unpin_message(client, message: Message):
     await message.delete()
 
 help_dict['pin'] = ('Pin',
-'''{prefix}pin <i>(maybe reply to a message)</i> - Pins the replied message
+'''{prefix}pin <i>(maybe reply to a message) [loud]</i> - Pins the replied message (use <code>loud</code> to notify all users)
 
 {prefix}unpin <i>(maybe reply to a message)</i> - Unpins the replied message''')
