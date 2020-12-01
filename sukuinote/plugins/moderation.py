@@ -361,6 +361,23 @@ async def unbanhammer(client, message):
 		await log_chat(chat_text)
 
 
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['add'], prefixes=config['config']['prefixes']))
+@log_errors
+@public_log_errors
+async def add_user(client, message: Message):
+	
+	value = await _ParseCommandArguments(client, message)
+	if value:
+		chat_id, entity_id, reason = value
+
+		# TODO: maybe support adding multiple people?
+		if await client.add_chat_members(chat_id.id, entity_id.id):
+			await message.edit(f"<code>Successfully added to {chat_id.title}</code>")
+		else:
+			await message.edit(f"<code>Failed to add {entity_id.title} to {chat_id.title}</code>")
+		await asyncio.sleep(3)
+		await message.delete()
+
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['k', 'kick'], prefixes=config['config']['prefixes']))
 @log_errors
 @public_log_errors
@@ -410,6 +427,8 @@ async def kick(client, message):
 help_dict['moderation'] = ('Moderation',
 '''{prefix}kick <i>[channel id|user id] [user id] [reason]</i> - Removes the user from the chat
 Aliases: {prefix}k
+
+{prefix}add <i>(maybe reply to a message)</i> - Adds the user to a chat (either via a reply or in the chat itself)
 
 {prefix}promote <i>[channel id|user id] [user id] [title]</i> - Promotes the user to an administrator
 

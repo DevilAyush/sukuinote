@@ -18,7 +18,6 @@ def convert_c(celsius):
 	cel = (cel - 32) * 5 / 9
 	return cel
 
-
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['curr'], prefixes=config['config']['prefixes']))
 @log_errors
 @public_log_errors
@@ -36,7 +35,7 @@ async def currency(client, message):
 	except ValueError as err:
 		await self_destruct(message, f"<code>{str(err)}</code>")
 
-@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['length'], prefixes=config['config']['prefixes']))
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['length', 'len'], prefixes=config['config']['prefixes']))
 @log_errors
 @public_log_errors
 async def length(client, message):
@@ -113,7 +112,6 @@ async def temperature(client, message):
 
 	await message.edit(text)
 
-
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['time'], prefixes=config['config']['prefixes']))
 @log_errors
 @public_log_errors
@@ -144,4 +142,12 @@ help_dict["calculator"] = ('Calculator',
 {prefix}temp <i>[temp] [C|F]</i> - Convert the source temp to dest
 
 {prefix}time <i>[TZ database name]</i> - Get the time in the timezone
+
+{prefix}volume <i>[value] [from unit] [to unit]</i> - Convert units of volume
+Aliases: {prefix}vol
+
+{prefix}lenth <i>[value] [from unit] [to unit]</i> - Convert units of length
+Aliases: {prefix}len
+
+{prefix}mass <i>[value] [from unit] [to unit]</i> - Convert units of mass
 ''')
