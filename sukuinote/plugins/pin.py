@@ -9,6 +9,7 @@ from .. import config, help_dict, log_errors, public_log_errors
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['pin'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def pin_message(client, message: Message):
     # First of all check if its a group or not
     if message.chat.type in ["group", "supergroup"]:

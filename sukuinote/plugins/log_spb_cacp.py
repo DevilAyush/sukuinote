@@ -47,8 +47,8 @@ async def log_forwards(client, message):
 			# Check for suspicious words.
 			for word in suspiciouswords:
 				if word in mcontent.lower():
-					ptid = header["Private Telegram ID"]
-					mhash = header["Message Hash"]
+					ptid = mheader["Private Telegram ID"]
+					mhash = mheader["Message Hash"]
 					await log_chat(f'<b>CACP Event</b>\n- <b>PTID:</b> {ptid}\n- <b>Message Hash:</b> {mhash}\n<a href="https://t.me/SpamProtectionLogs/{message.message_id}">Logged Message</a>')
 
 	except Exception as e:

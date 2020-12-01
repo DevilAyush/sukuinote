@@ -2,7 +2,7 @@ import asyncio, arrow
 from currency_converter import CurrencyConverter
 from pyrogram import Client, filters
 from unitconvert import lengthunits, massunits, volumeunits
-from .. import config, help_dict, get_entity, log_chat, log_errors, self_destruct
+from .. import config, help_dict, get_entity, log_chat, log_errors, self_destruct, public_log_errors
 
 c = CurrencyConverter()
 
@@ -21,6 +21,7 @@ def convert_c(celsius):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['curr'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def currency(client, message):
 	if len(message.command) <= 3:
 		await self_destruct(message, "<code>Incorrect Syntax</code>")
@@ -37,6 +38,7 @@ async def currency(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['length'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def length(client, message):
 	if len(message.command) <= 3:
 		await self_destruct(message, "<code>Incorrect Syntax</code>")
@@ -53,6 +55,7 @@ async def length(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['mass'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def mass(client, message):
 	if len(message.command) <= 3:
 		await self_destruct(message, "<code>Incorrect Syntax</code>")
@@ -69,6 +72,7 @@ async def mass(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['vol', 'volume'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def volume(client, message):
 	if len(message.command) <= 3:
 		await self_destruct(message, "<code>Incorrect Syntax</code>")
@@ -85,6 +89,7 @@ async def volume(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['temp'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def temperature(client, message):
 	if len(message.text.split()) <= 2:
 		await self_destruct(message, "<code>Incorrect Syntax</code>")
@@ -111,6 +116,7 @@ async def temperature(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['time'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def calc_time(client, message):
 
 	try:

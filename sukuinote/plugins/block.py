@@ -1,10 +1,11 @@
 import html, asyncio
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
-from .. import config, help_dict, log_errors, get_entity, log_chat
+from .. import config, help_dict, log_errors, get_entity, log_chat, public_log_errors
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['block'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def block(client, message):
 	entity = message.chat
 	command = message.command
@@ -40,6 +41,7 @@ async def block(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['unblock'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def unblock(client, message):
 	entity = message.chat
 	command = message.command

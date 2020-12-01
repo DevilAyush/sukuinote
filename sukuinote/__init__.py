@@ -239,8 +239,8 @@ def public_log_errors(func):
 			await func(client, message)
 		except (StopPropagation, ContinuePropagation):
 			raise
-		except Exception:
-			await message.reply_text("<code>" + html.escape(traceback.format_exc()) + "</code>", disable_web_page_preview=True)
+		except Exception as ex:
+			await message.reply_text("<code>" + html.escape(f"{type(ex).__name__}: {str(ex)}") + "</code>", disable_web_page_preview=True)
 			raise
 	return wrapper
 

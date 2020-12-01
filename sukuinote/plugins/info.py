@@ -29,6 +29,7 @@ def _generate_sexy(entity, ping):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['info', 'whois'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def info(client, message):
     entity = message.chat
     command = message.command
@@ -70,6 +71,7 @@ async def info(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command('id', prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def id(client, message):
     text_unping = '<b>Chat ID:</b>'
     if message.chat.username:

@@ -1,7 +1,7 @@
 import html, asyncio
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
-from .. import config, help_dict, get_entity, log_chat, log_errors, CheckAdmin, self_destruct
+from .. import config, help_dict, get_entity, log_chat, log_errors, CheckAdmin, self_destruct, public_log_errors
 from ..database import session, AutoScroll
 
 f = filters.chat([])
@@ -25,6 +25,7 @@ async def auto_read(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['as', 'autoscroll'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def autoscroll(client, message):
     command = message.command
     command.pop(0)

@@ -1,7 +1,7 @@
 import html, asyncio, time
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
-from .. import config, help_dict, get_entity, log_chat, log_errors, CheckAdmin, is_admin, _ParseCommandArguments, self_destruct
+from .. import config, help_dict, get_entity, log_chat, log_errors, CheckAdmin, is_admin, _ParseCommandArguments, self_destruct, public_log_errors
 
 # Mute Permissions
 mute_permissions = ChatPermissions(
@@ -46,6 +46,7 @@ async def _CheckGroupAndPerms(message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['promote'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def promote(client, message):
 	if not await _CheckGroupAndPerms(message):
 		return
@@ -108,6 +109,7 @@ async def promote(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['t', 'title'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def title(client, message):
 	if not await _CheckGroupAndPerms(message):
 		return
@@ -131,6 +133,7 @@ async def title(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['demote'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def demote(client, message):
 	if not await _CheckGroupAndPerms(message):
 		return
@@ -177,6 +180,7 @@ async def demote(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['m', 'mute'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def mute(client, message):
 
 	if not await _CheckGroupAndPerms(message):
@@ -222,6 +226,7 @@ async def mute(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['um', 'unmute'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def unmute(client, message):
 	if not await _CheckGroupAndPerms(message):
 		return
@@ -266,6 +271,7 @@ async def unmute(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['b', 'ban'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def banhammer(client, message):
 	if not await _CheckGroupAndPerms(message):
 		return
@@ -312,6 +318,7 @@ async def banhammer(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['ub', 'unban'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def unbanhammer(client, message):
 	if not await _CheckGroupAndPerms(message):
 		return
@@ -356,6 +363,7 @@ async def unbanhammer(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['k', 'kick'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def kick(client, message):
 
 	if not await _CheckGroupAndPerms(message):

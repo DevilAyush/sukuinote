@@ -3,10 +3,11 @@ import asyncio
 from pyrogram import Client, filters
 from pyrogram.methods.chats.get_chat_members import Filters as ChatMemberFilters
 from pyrogram.types import Message
-from .. import config, help_dict, log_errors, get_entity, _ParseCommandArguments
+from .. import config, help_dict, log_errors, get_entity, _ParseCommandArguments, public_log_errors
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['add'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def add_user(client, message: Message):
 	
 	value = await _ParseCommandArguments(client, message)

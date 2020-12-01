@@ -4,7 +4,7 @@ import unidecode
 import logging
 from unidecode import unidecode
 from pyrogram import Client, filters
-from .. import config, slave, log_errors, app_user_ids, log_chat, get_entity, self_destruct, database, CheckAdmin
+from .. import config, slave, log_errors, app_user_ids, log_chat, get_entity, self_destruct, database, CheckAdmin, public_log_errors
 
 DEBUG = False
 
@@ -17,6 +17,7 @@ spamkeywords = ["Teleagram", "Teleagram members Private", "group Promotio", "add
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['fspam'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def fspam(client, message):
 	if not getattr(message.reply_to_message, 'empty', True):
 		for chat in spamreportchats:
@@ -25,6 +26,7 @@ async def fspam(client, message):
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['autoban'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def autoban(client, message):
 	command = message.command
 	command.pop(0)

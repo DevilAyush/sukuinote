@@ -2,7 +2,7 @@
 
 import math, os, asyncio
 from PIL import Image
-from .. import slave, config, help_dict, get_entity, log_chat, log_errors, self_destruct, DB_AVAILABLE, database
+from .. import slave, config, help_dict, get_entity, log_chat, log_errors, self_destruct, DB_AVAILABLE, database, public_log_errors
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram import filters, Client
 
@@ -10,6 +10,7 @@ button = InlineKeyboardMarkup([[InlineKeyboardButton("Set Sticker Pack", callbac
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['kang'], prefixes=config['config']['prefixes']))
 @log_errors
+@public_log_errors
 async def kang_stickers(client, message):
 	if not DB_AVAILABLE:
 		await self_destruct(message, "<code>Your database is not avaiable!</code>")
