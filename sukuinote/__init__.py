@@ -193,18 +193,29 @@ async def _ParseCommandArguments(client, message):
 
 	return chat_id, entity_id, reason
 
-async def CheckAdmin(message: Message):
+async def CheckAdmin(client, message: Message):
 	"""Check if we are an admin."""
-	ranks = ["administrator", "creator"]
 
-	me = await app.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id)
+	# Here lies the sanity checks
+	admins = await client.get_chat_members(
+		message.chat.id, filter=ChatMemberFilters.ADMINISTRATORS
+	)
+	admin_ids = [user.user.id for user in admins]
+	me = await client.get_me()
 
-	if me.status not in ranks:
-		return False
-	else:
-		if me.status != "administrator" or me.can_restrict_members:
-			return True
+	# If you are an admin
+	if me.id in admin_ids:
+		return True
 	return False
+
+	# ranks = ["administrator", "creator"]
+	# me = await app.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id)
+	# if me.status not in ranks:
+	# 	return False
+	# else:
+	# 	if me.status != "administrator" or me.can_restrict_members:
+	# 		return True
+	# return False
 
 def log_errors(func):
 	@functools.wraps(func)

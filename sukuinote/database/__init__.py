@@ -57,9 +57,15 @@ class AutoBanSpammers(Base):
 		return f"<AutoBanSpammers {self.id}>"
 
 # For PM Permit
-# class AuthorizedUsers(Base):
-# 	__tablename__ = 'AuthorizedUsers'
-# 	id = Column(Integer, primary_key=True)
+class AuthorizedUsers(Base):
+	__tablename__ = 'AuthorizedUsers'
+	id = Column(Integer, primary_key=True)
+
+	def __init__(self, id):
+		self.id = id
+	
+	def __repr__(self):
+		return f"<AutoBanSpammers {self.id}>"
 
 # For future use to ban users that forward from
 # known spam channels in certain chats.
