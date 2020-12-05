@@ -7,6 +7,7 @@ import traceback
 import functools
 import yaml
 import aiohttp
+from io import BytesIO
 from datetime import timedelta
 from pyrogram import Client, StopPropagation, ContinuePropagation
 from pyrogram.types import Chat, User, Message
@@ -217,6 +218,11 @@ async def CheckAdmin(client, message: Message):
 	# 		return True
 	# return False
 
+def make_file(puke):
+	barf = BytesIO(puke.encode('utf-8'))
+	barf.name = "traceback.txt"
+	return barf
+
 def log_errors(func):
 	@functools.wraps(func)
 	async def wrapper(client, *args):
@@ -226,14 +232,30 @@ def log_errors(func):
 			raise
 		except Exception:
 			tb = traceback.format_exc()
+			is_vomit =  len(tb) >= 4096
 			try:
-				await slave.send_message(config['config']['log_chat'], f'Exception occured in <code>{func.__name__}\n\n{html.escape(tb)}</code>', disable_web_page_preview=True)
+				if is_vomit:
+					await slave.send_document(config['config']['log_chat'], make_file(tb.strip()), caption=f"Exception occured in <code>{func.__name__}</code>")
+				else:
+					await slave.send_message(config['config']['log_chat'], f'Exception occured in <code>{func.__name__}\n\n{html.escape(tb)}</code>', disable_web_page_preview=True)
 			except Exception:
 				logging.exception('Failed to log exception for %s as slave', func.__name__)
-				tb = traceback.format_exc()
+				tb2 = traceback.format_exc()
+				is_vomit_again = len(tb2) >= 4096
 				for app in apps:
 					try:
-						await app.send_message(config['config']['log_chat'], f'Exception occured in <code>{func.__name__}\n\n{html.escape(tb)}</code>', disable_web_page_preview=True)
+						if is_vomit:
+							puke_msg = await app.send_document(config['config']['log_chat'], make_file(tb.strip()), caption=f"Exception occured in <code>{func.__name__}</code>")
+							if is_vomit_again:
+								await puke_msg.reply_document(make_file(tb2.strip()), caption=f"Exception occured in the exception handler")
+							else:
+								await puke_msg.reply(f'Exception occured in exception handler <code>{func.__name__}\n\n{html.escape(tb2)}</code>', disable_web_page_preview=True)
+						else:
+							puke_msg = await app.send_message(config['config']['log_chat'], f'Exception occured in <code>{func.__name__}\n\n{html.escape(tb)}</code>', disable_web_page_preview=True)
+							if is_vomit_again:
+								await puke_msg.reply_document(make_file(tb2.strip()), caption=f"Exception occured in the exception handler")
+							else:
+								await puke_msg.reply(f'Exception occured in exception handler <code>{func.__name__}\n\n{html.escape(tb2)}</code>', disable_web_page_preview=True)
 					except Exception:
 						logging.exception('Failed to log exception for %s as app', func.__name__)
 						tb = traceback.format_exc()
