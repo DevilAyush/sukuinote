@@ -26,26 +26,44 @@ async def purge(client, message):
     command = ' '.join(command)
     ids = set((message.message_id,))
     reply = message.reply_to_message
+    supergroup = str(message.chat.id).startswith("-100")
+
     if command.isnumeric():
         command = int(command)
-        if selfpurge:
-            async for i in client.iter_history(message.chat.id, offset=1):
-                if not (selfpurge and not i.outgoing):
-                    ids.add(i.message_id)
-                    command -= 1
-                if command <= 0:
-                    break
+        if supergroup:
+            if not selfpurge:
+                ids |= set(range(message.message_id - command, message.message_id))
+            else:
+                async for i in client.iter_history(message.chat.id, offset=1):
+                    if not (selfpurge and not i.outgoing):
+                        ids.add(i.message_id)
+                        command -= 1
+                    if command <= 0:
+                        break
         else:
-            async for i in client.iter_history(message.chat.id, offset=1, limit=command):
-                ids.add(i.message_id)
+            # private group IDs are not sequential
+            if selfpurge:
+                if not supergroup:
+                    async for i in client.iter_history(message.chat.id, offset=1):
+                        if not (selfpurge and not i.outgoing):
+                            ids.add(i.message_id)
+                            command -= 1
+                        if command <= 0:
+                            break
+            else:
+                async for i in client.iter_history(message.chat.id, offset=1, limit=command):
+                    ids.add(i.message_id)
     elif not getattr(reply, 'empty', True):
         if not (selfpurge and not reply.outgoing):
             ids.add(reply.message_id)
-        async for i in client.iter_history(message.chat.id, offset=1):
-            if not (selfpurge and not i.outgoing):
-                ids.add(i.message_id)
-            if reply.message_id + 1 >= i.message_id:
-                break
+        if supergroup:
+            ids |= set(range(reply.message_id, message.message_id))
+        else:
+            async for i in client.iter_history(message.chat.id, offset=1):
+                if not (selfpurge and not i.outgoing):
+                    ids.add(i.message_id)
+                if reply.message_id + 1 >= i.message_id:
+                    break
     await client.delete_messages(message.chat.id, ids)
 
 yeetpurge_info = {True: dict(), False: dict()}
