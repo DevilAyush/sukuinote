@@ -107,7 +107,7 @@ async def pm_block(client, message):
 	if not config['config']['pmpermit']['enabled']:
 		return
 
-	if not DEBUG and await special_user(message.from_user.id):
+	if not DEBUG and await special_user(message.from_user):
 		return
 
 	async with lock:
