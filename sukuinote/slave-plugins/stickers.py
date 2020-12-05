@@ -111,14 +111,14 @@ async def set_stickers(client, message):
 				sticker = AnimatedStickerSet(message.from_user.id, message.text)
 				session.add(sticker)
 		session.commit()
-		status = "Ok, sticker was set to `{}`".format(message.text)
+		status = "Ok, sticker pack was set to <code>{}</code>.".format(message.text)
 	else:
 		status = "Invalid pack selected."
 
 	TEMP_KEYBOARD = []
 	USER_SET = {}
 	button = InlineKeyboardMarkup([[InlineKeyboardButton("Set Sticker Pack", callback_data="setsticker")]])
-	await slave.send_message(message.chat.id, "Done! What else would you like to do?", reply_markup=button)
+	await slave.send_message(message.chat.id, f"{status}\nWhat else would you like to do?", reply_markup=button)
 
 
 @slave.on_callback_query(filters.regex("^setsticker$"))
@@ -143,15 +143,14 @@ async def settings_sticker(client, message):
 		keyboard = await app.get_history("@Stickers", limit=1)
 		keyboard = keyboard[0].reply_markup.keyboard
 	except:
-		await message.edit("You dont have any sticker pack!\nAdd stickers pack in @Stickers ")
+		await message.edit("You dont have any sticker pack!\nAdd stickers pack in @Stickers")
 		return
 	for x in keyboard:
 		for y in x:
 			TEMP_KEYBOARD.append(y)
 
 	await app.send_message("@Stickers", "/cancel")
-	await message.message.delete()
 	await app.delete_messages("@Stickers", [ms.message_id for ms in await app.get_history("@Stickers", limit=4)])
 	msg = await slave.send_message(message.from_user.id, "Select your stickers for set as kang animation sticker", reply_markup=ReplyKeyboardMarkup(keyboard))
 	USER_SET[message.from_user.id] = msg.message_id
-	USER_SET["type"] = 2
+	USER_SET["type"] = 1
