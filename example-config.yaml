@@ -12,6 +12,10 @@ config:
         - blankie
         - knees
         - nezuko
+    pmpermit:
+        enabled: True
+        warnretard: 5
+        maxretard: 7
     log_chat: -1000000000000
     spamwatch_api: https://t.me/SpamWatchBot
     owlantispam_api: https://t.me/OwlAntiSpam

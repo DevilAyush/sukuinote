@@ -1,5 +1,6 @@
 import os
 import sys
+import logging
 from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, UnicodeText
 from sqlalchemy import ext
 from sqlalchemy.ext.declarative import declarative_base
@@ -8,6 +9,8 @@ from .. import config
 
 Base = declarative_base()
 session = None
+
+from .pmpermit import AuthorizedUsers
 
 #########
 # Models
@@ -56,17 +59,6 @@ class AutoBanSpammers(Base):
 	def __repr__(self):
 		return f"<AutoBanSpammers {self.id}>"
 
-# For PM Permit
-class AuthorizedUsers(Base):
-	__tablename__ = 'AuthorizedUsers'
-	id = Column(Integer, primary_key=True)
-
-	def __init__(self, id):
-		self.id = id
-	
-	def __repr__(self):
-		return f"<AutoBanSpammers {self.id}>"
-
 # For future use to ban users that forward from
 # known spam channels in certain chats.
 # class BannedForwards(Base):
@@ -91,17 +83,24 @@ def innit():
 	AnimatedStickerSet.__table__.create(checkfirst=True)
 	AutoScroll.__table__.create(checkfirst=True)
 	AutoBanSpammers.__table__.create(checkfirst=True)
+	AuthorizedUsers.__table__.create(checkfirst=True)
 	return True
 
 def get_sticker_set(user_id):
+	global session
 	try:
 		return session.query(StickerSet).get(user_id)
-	finally:
-		session.close()
+	except:
+		logging.exception("Exception in get_sticker_set")
+		session.rollback()
+		return None
 
 def get_animated_set(user_id):
+	global session
 	try:
 		return session.query(AnimatedStickerSet).get(user_id)
-	finally:
-		session.close()
+	except:
+		logging.exception("Exception in get_animated_set")
+		session.rollback()
+		return None
 

@@ -12,5 +12,5 @@ pillow
 sqlalchemy
 unidecode
 unitconvert
-privacy.py
+#privacy.py
 #SQLAlchemy-Utils
