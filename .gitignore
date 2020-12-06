@@ -3,3 +3,6 @@ sessions/
 config.yaml
 runtime/
 sukuinote/plugins/justasic/
+unknown_errors.txt
+*.db
+.vscode
