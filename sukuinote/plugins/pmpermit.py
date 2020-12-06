@@ -279,7 +279,7 @@ async def pm_button(client, query):
 			session.commit()
 	elif subcommand == "apr":
 		target = int(query.matches[0].group(3))
-		user, client = await get_user(target)
+		user, client = await get_user(client, target)
 		await query.message.edit_text(f"{_make_sexy(user)} has been approved for PM.")
 		await app.send_message(target, "<code>Approved.</code>")
 		async with lock:
