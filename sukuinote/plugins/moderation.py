@@ -33,12 +33,12 @@ unmute_permissions = ChatPermissions(
 )
 
 # Convenience functions
-async def _CheckGroupAndPerms(message):
+async def _CheckGroupAndPerms(client, message):
 	if not message.chat.type in ["group", "supergroup"]:
 		await self_destruct(message, "<code>How am I supposed to do this in a damn private chat?</code>")
 		return False
 
-	if not await CheckAdmin(message):
+	if not await CheckAdmin(client, message):
 		await self_destruct(message, "<code>I am not an admin here lmao. What am I doing?</code>")
 		return False
 
@@ -48,7 +48,7 @@ async def _CheckGroupAndPerms(message):
 @log_errors
 @public_log_errors
 async def promote(client, message):
-	if not await _CheckGroupAndPerms(message):
+	if not await _CheckGroupAndPerms(client, message):
 		return
 
 	value = await _ParseCommandArguments(client, message)
@@ -111,7 +111,7 @@ async def promote(client, message):
 @log_errors
 @public_log_errors
 async def title(client, message):
-	if not await _CheckGroupAndPerms(message):
+	if not await _CheckGroupAndPerms(client, message):
 		return
 
 	value = await _ParseCommandArguments(client, message)
@@ -135,7 +135,7 @@ async def title(client, message):
 @log_errors
 @public_log_errors
 async def demote(client, message):
-	if not await _CheckGroupAndPerms(message):
+	if not await _CheckGroupAndPerms(client, message):
 		return
 
 	value = await _ParseCommandArguments(client, message)
@@ -183,7 +183,7 @@ async def demote(client, message):
 @public_log_errors
 async def mute(client, message):
 
-	if not await _CheckGroupAndPerms(message):
+	if not await _CheckGroupAndPerms(client, message):
 		return
 
 	value = await _ParseCommandArguments(client, message)
@@ -228,7 +228,7 @@ async def mute(client, message):
 @log_errors
 @public_log_errors
 async def unmute(client, message):
-	if not await _CheckGroupAndPerms(message):
+	if not await _CheckGroupAndPerms(client, message):
 		return
 
 	value = await _ParseCommandArguments(client, message)
@@ -273,7 +273,7 @@ async def unmute(client, message):
 @log_errors
 @public_log_errors
 async def banhammer(client, message):
-	if not await _CheckGroupAndPerms(message):
+	if not await _CheckGroupAndPerms(client, message):
 		return
 
 	value = await _ParseCommandArguments(client, message)
@@ -320,7 +320,7 @@ async def banhammer(client, message):
 @log_errors
 @public_log_errors
 async def unbanhammer(client, message):
-	if not await _CheckGroupAndPerms(message):
+	if not await _CheckGroupAndPerms(client, message):
 		return
 
 	value = await _ParseCommandArguments(client, message)
@@ -383,7 +383,7 @@ async def add_user(client, message: Message):
 @public_log_errors
 async def kick(client, message):
 
-	if not await _CheckGroupAndPerms(message):
+	if not await _CheckGroupAndPerms(client, message):
 		return
 
 	value = await _ParseCommandArguments(client, message)
