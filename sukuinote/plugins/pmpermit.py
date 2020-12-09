@@ -28,17 +28,17 @@ from ..database import session
 welc_txt = """
 <b>\N{WARNING SIGN} [AUTOMATED] \N{WARNING SIGN}</b>
 Hello! I do not accept private messages (PMs/DMs) from
-unknown people. Please wait patiently for me to accept
-your message BEFORE you continue messaging! 
+unknown people. Please do not continue messaging me
+until my response as you will be blocked automatically.
 
 <b>SPAMMING WILL GET YOU BLOCKED + REPORTED</b>
 
-You can try contacting me by pressing buttons down below
+Please use one of the buttons below to try contacting me
 """
 
 spam_warn = """
 <b>\N{WARNING SIGN} [AUTOMATED] \N{WARNING SIGN}</b>
-Continuing to spam will get you <b>BLOCKED + REPORTED!</b>
+Continuing to send messages will get you <b>BLOCKED + REPORTED!</b>
 
 This is your final warning!
 """
@@ -117,7 +117,7 @@ async def pm_block(client, message):
 			session.add(auth)
 	
 	if not auth.approved:
-		# await client.read_history(message.chat.id)
+		await client.read_history(message.chat.id)
 		if message.text:
 			for x in message.text.lower().split():
 				if x in BLACKLIST:
@@ -251,7 +251,7 @@ async def pm_button(client, query):
 	subcommand = query.matches[0].group(1)
 	app = await get_app(int(query.matches[0].group(2)))
 
-	if query.from_user.id in app_user_ids and subcommand not in ["apr", "blk", "rpt"]:
+	if query.from_user.id in app_user_ids and subcommand not in ["apr", "blk", "rpt", "blk_rpt"]:
 		await client.answer_callback_query(query.id, "That's for them, not you.", show_alert=False)
 		return
 
