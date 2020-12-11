@@ -30,7 +30,7 @@ async def currency(client, message):
 	curr1 = message.command[2].upper()
 	curr2 = message.command[3].upper()
 	try:
-		conv = c.convert(int(value), curr1, curr2)
+		conv = c.convert(float(value), curr1, curr2)
 		await message.edit(f"<code>{value} {curr1} = {conv:,.2f} {curr2}</code>")
 	except ValueError as err:
 		await self_destruct(message, f"<code>{str(err)}</code>")
