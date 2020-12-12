@@ -14,11 +14,17 @@ config:
         - nezuko
     pmpermit:
         enabled: True
+        # How many messages they can send before we warn them
+        # about being considered spam
         warnretard: 5
+        # How many messages since the first message
+        # they sent until they're considered spam and will
+        # be blocked.
         maxretard: 7
     log_chat: -1000000000000
     spamwatch_api: https://t.me/SpamWatchBot
     owlantispam_api: https://t.me/OwlAntiSpam
+    bolverwatch_api: https://t.me/JoinProtectionBot
     timezone: America/Los_Angeles
     log_user_joins: false
     log_user_adds: true

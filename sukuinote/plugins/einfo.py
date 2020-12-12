@@ -49,7 +49,7 @@ DEAI_MODULE_CODES = {
     "8": "Codename Gestapo"
 }
 
-@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['einfo', 'externalinfo', 'owl', 'owlantispam', 'sw', 'spamwatch', 'deai', 'spb', 'spamprotection', 'cas', 'combot', 'rose'], prefixes=config['config']['prefixes']))
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['einfo', 'externalinfo', 'bw', 'bolverwatch', 'owl', 'owlantispam', 'sw', 'spamwatch', 'deai', 'spb', 'spamprotection', 'cas', 'combot', 'rose'], prefixes=config['config']['prefixes']))
 @log_errors
 @public_log_errors
 async def fedstat(client, message):
@@ -58,7 +58,8 @@ async def fedstat(client, message):
     command = args.pop(0).lower()
 
     swtoken = {"token": config["config"]["spamwatch_api"], "endpoint": "https://api.spamwat.ch/banlist/"}
-    owltoken = {"token": config["config"]["owlantispam_api"], "endpoint": "http://kantek.eule.computer/"}
+    owltoken = {"token": config["config"]["owlantispam_api"], "endpoint": "https://kantek.eule.computer/"}
+    BolverWatchtoken = {"token": config["config"]["bolverwatch_api"], "endpoint": "https://spamapi.bolverblitz.net/"}
 
     if args:
         entity = ' '.join(args)
@@ -74,6 +75,8 @@ async def fedstat(client, message):
         await message.reply_text(f'SpamWatch:\n{await get_spamwatch(swtoken, entity)}')
     elif command in ('owl', 'owlantispam'):
         await message.reply_text(f'Owl Antispam:\n{await get_spamwatch(owltoken, entity)}')
+    elif command in ('bw', 'bolverwatch'):
+        await message.reply_text(f'BolverWatch:\n{await get_spamwatch(BolverWatchtoken, entity)}')
     elif command == 'deai':
         await message.reply_text(f'DEAI:\n{await get_deai(client, entity)}')
     elif command == 'rose':
@@ -81,12 +84,23 @@ async def fedstat(client, message):
     elif command in ('cas', 'combot'):
         await message.reply_text(f'CAS:\n{await get_cas(entity)}')
     else:
-        spamwatch, owl, deai, cas, spam_protection, rose = await asyncio.gather(get_spamwatch(swtoken, entity), get_spamwatch(owltoken, entity), get_deai(client, entity), get_cas(entity), get_spam_protection(entity), get_rose(client, entity))
+        spamwatch, owl, bolver, deai, cas, spam_protection, rose = await asyncio.gather(
+            get_spamwatch(swtoken, entity),
+            get_spamwatch(owltoken, entity),
+            get_spamwatch(BolverWatchtoken, entity),
+            get_deai(client, entity),
+            get_cas(entity),
+            get_spam_protection(entity),
+            get_rose(client, entity)
+        )
         await message.reply_text(f'''SpamWatch:
 {spamwatch}
 
 Owl Antispam:
 {owl}
+
+BolverWatch:
+{bolver}
 
 CAS:
 {cas}
