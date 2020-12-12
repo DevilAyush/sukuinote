@@ -26,6 +26,9 @@ config:
     owlantispam_api: https://t.me/OwlAntiSpam
     bolverwatch_api: https://t.me/JoinProtectionBot
     timezone: America/Los_Angeles
+    # Ignore certain chats where mass-banning occures
+    ignore_chat_bans:
+        - -1000000000000
     log_user_joins: false
     log_user_adds: true
     log_reports: true

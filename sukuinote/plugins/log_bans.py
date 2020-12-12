@@ -12,6 +12,10 @@ lock = asyncio.Lock()
 async def log_ban(client, message):
     if not config['config']['log_bans']:
         return
+
+	if message.chat.id in config['config']['ignore_chat_bans']:
+		return
+		
     identifier = (message.chat.id, message.message_id)
     async with lock:
         if identifier in banned:
