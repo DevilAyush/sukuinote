@@ -30,3 +30,5 @@ config:
     log_user_adds: true
     log_reports: true
     log_forwards: true
+    log_bans: true
+    log_warns: false
