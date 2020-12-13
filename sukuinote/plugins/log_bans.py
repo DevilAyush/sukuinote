@@ -7,7 +7,7 @@ from .. import config, slave, log_errors
 banned = set()
 lock = asyncio.Lock()
 
-@Client.on_message(filters.regex(r'^[/!](?:[gsf]+ban?)(?:$|\W+)') & filters.group)
+@Client.on_message(filters.regex(r'^[/!](?:[gsf]*ban?)(?:$|\W+)') & filters.group)
 @log_errors
 async def log_ban(client, message):
 	if not config['config']['log_bans']:
