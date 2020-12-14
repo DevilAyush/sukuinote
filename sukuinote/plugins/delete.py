@@ -57,7 +57,14 @@ async def purge(client, message):
         if not (selfpurge and not reply.outgoing):
             ids.add(reply.message_id)
         if supergroup:
-            ids |= set(range(reply.message_id, message.message_id))
+            if not selfpurge:
+                ids |= set(range(reply.message_id, message.message_id))
+            else:
+                async for i in client.iter_history(message.chat.id, offset=1):
+                    if not (selfpurge and not i.outgoing):
+                        ids.add(i.message_id)
+                    if reply.message_id + 1 >= i.message_id:
+                        break
         else:
             async for i in client.iter_history(message.chat.id, offset=1):
                 if not (selfpurge and not i.outgoing):
