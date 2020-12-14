@@ -12,6 +12,10 @@ lock = asyncio.Lock()
 async def log_warn(client, message):
     if not config['config']['log_warns']:
         return
+	
+	if message.from_user.is_bot:
+		return
+
     identifier = (message.chat.id, message.message_id)
     async with lock:
         if identifier in warned:
