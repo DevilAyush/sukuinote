@@ -190,7 +190,7 @@ async def mute(client, message):
 	if value:
 		chat_id, entity_id, reason = value
 
-		if is_admin(client, message, entity_id):
+		if await is_admin(client, message, entity_id):
 			await self_destruct(message, "<code>lol they're admin u tart.</code>")
 			return
 
@@ -235,7 +235,7 @@ async def unmute(client, message):
 	if value:
 		chat_id, entity_id, reason = value
 
-		if is_admin(client, message, entity_id):
+		if await is_admin(client, message, entity_id):
 			await self_destruct(message, "<code>lol they're admin u tart.</code>")
 			return
 
@@ -282,7 +282,7 @@ async def banhammer(client, message):
 		chat_id, entity_id, reason = value
 		print(chat_id, "\n\n\n", entity_id)
 
-		if is_admin(client, message, entity_id):
+		if await is_admin(client, message, entity_id):
 			await self_destruct(message, "<code>lol they're admin u tart.</code>")
 			return
 
@@ -327,7 +327,7 @@ async def unbanhammer(client, message):
 	if value:
 		chat_id, entity_id, reason = value
 
-		if is_admin(client, message, entity_id):
+		if await is_admin(client, message, entity_id):
 			await self_destruct(message, "<code>lol they're admin u tart.</code>")
 			return
 
@@ -390,7 +390,7 @@ async def kick(client, message):
 	if value:
 		chat_id, entity_id, reason = value
 
-		if is_admin(client, message, entity_id):
+		if await is_admin(client, message, entity_id):
 			await self_destruct(message, "<code>lol they're admin u tart.</code>")
 			return
 
