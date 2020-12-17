@@ -2,6 +2,9 @@ telegram:
     api_id: 0
     api_hash: https://my.telegram.org
     slave_bot_token: https://t.me/BotFather
+sql:
+    # See: https://docs.sqlalchemy.org/en/14/core/engines.html
+    uri: postgresql://scott:tiger@localhost:5432/mydatabase
 config:
     prefixes:
         - .
@@ -9,9 +12,26 @@ config:
         - blankie
         - knees
         - nezuko
-    log_chat: -1001278205033
+    pmpermit:
+        enabled: True
+        # How many messages they can send before we warn them
+        # about being considered spam
+        warnretard: 5
+        # How many messages since the first message
+        # they sent until they're considered spam and will
+        # be blocked.
+        maxretard: 7
+    log_chat: -1000000000000
     spamwatch_api: https://t.me/SpamWatchBot
+    owlantispam_api: https://t.me/OwlAntiSpam
+    bolverwatch_api: https://t.me/JoinProtectionBot
+    timezone: America/Los_Angeles
+    # Ignore certain chats where mass-banning occures
+    ignore_chat_bans:
+        - -1000000000000
     log_user_joins: false
     log_user_adds: true
     log_reports: true
     log_forwards: true
+    log_bans: true
+    log_warns: false

@@ -40,7 +40,7 @@ async def info(client, message):
         entity = message.reply_to_message.from_user or message.reply_to_message.chat
     try:
         entity, entity_client = await get_entity(client, entity)
-    except BaseException as ex:
+    except Exception as ex:
         await message.reply_text(f'{type(ex).__name__}: {str(ex)}', parse_mode=None)
         return
     text_ping = _generate_sexy(entity, True)
@@ -109,6 +109,15 @@ async def id(client, message):
             text += f' <code>{reply.forward_from.id}</code>\n'
             text_unping += text
             text_ping += f'\n<b><a href="tg://user?id={reply.forward_from.id}">Forwarded User ID:</a></b> <code>{reply.forward_from.id}</code>\n'
+        if getattr(reply, 'document', None):
+            text = "\n"
+            text += f"<b>File ID:</b> {reply.document.file_id}\n"
+            text += f"<b>File Ref:</b> {reply.document.file_ref}\n"
+            text += f"<b>File Name:</b> {reply.document.file_name}\n"
+            text += f"<b>File Size:</b> {reply.document.file_size}\n"
+            text += f"<b>Mime Type:</b> {reply.document.mime_type}\n"
+            text_unping += text
+            text_ping += text
     reply = await message.reply_text(text_unping, disable_web_page_preview=True)
     if text_unping != text_ping:
         await reply.edit_text(text_ping, disable_web_page_preview=True)

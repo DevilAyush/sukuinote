@@ -1,6 +1,6 @@
 import html
 from pyrogram import Client, filters
-from .. import config, help_dict, log_errors, public_log_errors, get_entity
+from .. import config, help_dict, log_errors, public_log_errors, get_entity, self_destruct
 
 ZWS = '\u200B'
 def _generate_sexy(entity, ping):
@@ -38,7 +38,11 @@ async def admins(client, message):
             chat = int(chat)
         except ValueError:
             pass
-        chat, entity_client = await get_entity(client, chat)
+        try:
+            chat, entity_client = await get_entity(client, chat)
+        except:
+            await self_destruct("<code>Invalid chat or group</code>")
+            return
     text_unping = text_ping = ''
     async for i in entity_client.iter_chat_members(chat.id, filter='administrators'):
         text_unping += f'\n[<code>{i.user.id}</code>] {_generate_sexy(i.user, False)}'

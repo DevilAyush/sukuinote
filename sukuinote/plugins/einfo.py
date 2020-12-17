@@ -49,13 +49,18 @@ DEAI_MODULE_CODES = {
     "8": "Codename Gestapo"
 }
 
-@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['einfo', 'externalinfo', 'sw', 'spamwatch', 'deai', 'spb', 'spamprotection', 'cas', 'combot', 'rose'], prefixes=config['config']['prefixes']))
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['einfo', 'externalinfo', 'bw', 'bolverwatch', 'owl', 'owlantispam', 'sw', 'spamwatch', 'deai', 'spb', 'spamprotection', 'cas', 'combot', 'rose'], prefixes=config['config']['prefixes']))
 @log_errors
 @public_log_errors
 async def fedstat(client, message):
     entity = message.from_user
     args = message.command
     command = args.pop(0).lower()
+
+    swtoken = {"token": config["config"]["spamwatch_api"], "endpoint": "https://api.spamwat.ch/banlist/"}
+    owltoken = {"token": config["config"]["owlantispam_api"], "endpoint": "https://kantek.eule.computer/"}
+    BolverWatchtoken = {"token": config["config"]["bolverwatch_api"], "endpoint": "https://spamapi.bolverblitz.net/"}
+
     if args:
         entity = ' '.join(args)
     elif not getattr(message.reply_to_message, 'empty', True):
@@ -67,7 +72,11 @@ async def fedstat(client, message):
     if entity.startswith('TEL-') or int(entity) < 0 or command in ('spb', 'spamprotection'):
         await message.reply_text(f'Spam Protection:\n{await get_spam_protection(entity)}')
     elif command in ('sw', 'spamwatch'):
-        await message.reply_text(f'SpamWatch:\n{await get_spamwatch(entity)}')
+        await message.reply_text(f'SpamWatch:\n{await get_spamwatch(swtoken, entity)}')
+    elif command in ('owl', 'owlantispam'):
+        await message.reply_text(f'Owl Antispam:\n{await get_spamwatch(owltoken, entity)}')
+    elif command in ('bw', 'bolverwatch'):
+        await message.reply_text(f'BolverWatch:\n{await get_spamwatch(BolverWatchtoken, entity)}')
     elif command == 'deai':
         await message.reply_text(f'DEAI:\n{await get_deai(client, entity)}')
     elif command == 'rose':
@@ -75,9 +84,23 @@ async def fedstat(client, message):
     elif command in ('cas', 'combot'):
         await message.reply_text(f'CAS:\n{await get_cas(entity)}')
     else:
-        spamwatch, deai, cas, spam_protection, rose = await asyncio.gather(get_spamwatch(entity), get_deai(client, entity), get_cas(entity), get_spam_protection(entity), get_rose(client, entity))
+        spamwatch, owl, bolver, deai, cas, spam_protection, rose = await asyncio.gather(
+            get_spamwatch(swtoken, entity),
+            get_spamwatch(owltoken, entity),
+            get_spamwatch(BolverWatchtoken, entity),
+            get_deai(client, entity),
+            get_cas(entity),
+            get_spam_protection(entity),
+            get_rose(client, entity)
+        )
         await message.reply_text(f'''SpamWatch:
 {spamwatch}
+
+Owl Antispam:
+{owl}
+
+BolverWatch:
+{bolver}
 
 CAS:
 {cas}
@@ -91,8 +114,8 @@ DEAI:
 Spam Protection:
 {spam_protection}''')
 
-async def get_spamwatch(entity):
-    async with session.get(f'https://api.spamwat.ch/banlist/{entity}', headers={'Authorization': f'Bearer {config["config"]["spamwatch_api"]}'}) as resp:
+async def get_spamwatch(token, entity):
+    async with session.get(f'{token["endpoint"]}{entity}', headers={'Authorization': f'Bearer {token["token"]}'}) as resp:
         try:
             json = await resp.json()
         except BaseException as ex:
@@ -208,6 +231,10 @@ help_dict['einfo'] = ('External Info',
 '''{prefix}externalinfo <i>&lt;user&gt;</i> - Get extended info of <i>&lt;user&gt;</i>
 {prefix}externalinfo <i>(as reply to message)</i> - Get extended info of replied user
 Aliases: {prefix}extinfo, {prefix}einfo
+
+{prefix}owlantispam <i>&lt;user&gt;</i> - Get Owl Anti-Spam info of <i>&lt;user&gt;</i>
+{prefix}owlantispam <i>(as reply to message)</i> - Get Owl Anti-Spam info of replied user
+Aliases: {prefix}owl
 
 {prefix}spamwatch <i>&lt;user&gt;</i> - Get SpamWatch info of <i>&lt;user&gt;</i>
 {prefix}spamwatch <i>(as reply to message)</i> - Get SpamWatch info of replied user

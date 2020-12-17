@@ -43,5 +43,6 @@ async def cat(client, message):
         if rfile:
             rfile.close()
 
-help_dict['cat'] = ('cat', '''{prefix}cat <i>(as caption of text file or reply)</i> - Outputs file's text to Telegram
+
+help_dict['cat'] = ('Cat', '''{prefix}cat <i>(as caption of text file or reply)</i> - Outputs file's text to Telegram
 {prefix}cat <i>&lt;path to local file&gt;</i> - Outputs file's text to Telegram''')
