@@ -13,7 +13,7 @@ async def log_warn(client, message):
 	if not config['config']['log_warns']:
 		return
 	
-	if message.from_user.is_bot:
+	if message.from_user.is_bot and not message.from_user.id == 1087968824:
 		return
 
 	identifier = (message.chat.id, message.message_id)
