@@ -16,7 +16,7 @@ async def log_ban(client, message):
 	if message.chat.id in config['config']['ignore_chat_bans']:
 		return
 
-	if message.from_user.is_bot:
+	if message.from_user.is_bot and not message.from_user.id == 1087968824:
 		return
 		
 	identifier = (message.chat.id, message.message_id)
