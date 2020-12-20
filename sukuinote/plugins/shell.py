@@ -28,12 +28,17 @@ def _dumb_wait(pid, timeout):
 
     return False
 
-@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.regex('^(?:' + '|'.join(map(re.escape, config['config']['prefixes'])) + r')(?:(?:ba)?sh|shell|term(?:inal)?)\s+(.+)(?:\n([\s\S]+))?$'))
+SHELL_REGEX = '^(?:' + '|'.join(map(re.escape, config['config']['prefixes'])) + r')(?:(?:ba)?sh|shell|term(?:inal)?)\s+(.+)(?:\n([\s\S]+))?$'
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.regex(SHELL_REGEX))
 @log_errors
 @public_log_errors
 async def shell(client, message):
+    match = re.match(SHELL_REGEX, message.text.markdown)
+    if not match:
+        return
     command = message.matches[0].group(1)
     stdin = message.matches[0].group(2)
+    reply = await message.reply_text('Executing...')
     process = await asyncio.create_subprocess_shell(command, stdin=asyncio.subprocess.PIPE if stdin else None, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     process.cmdline = command
     processes[process.pid] = process
