@@ -7,7 +7,7 @@ from .. import config, slave, log_errors
 warned = set()
 lock = asyncio.Lock()
 
-@Client.on_message(filters.regex(r'^[/!](?:warn?)(?:$|\W+)') & filters.group)
+@Client.on_message(~filters.chat(config['config']['log_chat']) & filters.regex(r'^[/!](?:warn?)(?:$|\W+)') & filters.group)
 @log_errors
 async def log_warn(client, message):
 	if not config['config']['log_warns']:
