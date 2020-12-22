@@ -16,6 +16,11 @@ async def log_warn(client, message):
 	if message.from_user.is_bot and not message.from_user.id == 1087968824:
 		return
 
+	# Ignore the slave forwards
+	if not getattr(message.forward_from, 'empty', True):
+		if message.forward_from.id == (await slave.get_me()).id:
+			return
+
 	identifier = (message.chat.id, message.message_id)
 	async with lock:
 		if identifier in warned:

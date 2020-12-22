@@ -13,9 +13,16 @@ async def log_ban(client, message):
 	if not config['config']['log_bans']:
 		return
 
+	# Ignored chats.
 	if message.chat.id in config['config']['ignore_chat_bans']:
 		return
 
+	# Ignore the slave forwards
+	if not getattr(message.forward_from, 'empty', True):
+		if message.forward_from.id == (await slave.get_me()).id:
+			return
+
+	# 1087968824 is @GroupAnonymousBot
 	if message.from_user.is_bot and not message.from_user.id == 1087968824:
 		return
 		

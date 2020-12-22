@@ -12,6 +12,12 @@ lock = asyncio.Lock()
 async def log_reports(client, message):
     if not config['config']['log_reports']:
         return
+
+    # Ignore the slave forwards
+	if not getattr(message.forward_from, 'empty', True):
+		if message.forward_from.id == (await slave.get_me()).id:
+			return
+    
     identifier = (message.chat.id, message.message_id)
     async with lock:
         if identifier in reported:
