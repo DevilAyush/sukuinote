@@ -38,7 +38,6 @@ async def shell(client, message):
         return
     command = message.matches[0].group(1)
     stdin = message.matches[0].group(2)
-    reply = await message.reply_text('Executing...')
     process = await asyncio.create_subprocess_shell(command, stdin=asyncio.subprocess.PIPE if stdin else None, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     process.cmdline = command
     processes[process.pid] = process
