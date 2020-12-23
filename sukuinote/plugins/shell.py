@@ -47,8 +47,8 @@ async def shell(client, message):
     text = f'<b>Exit Code:</b> <code>{returncode}</code>\n'
     if process.pid in processes:
         del processes[process.pid]
-    stdout = stdout.decode().replace('\r', '').strip('\n')
-    stderr = stderr.decode().replace('\r', '').strip('\n')
+    stdout = stdout.decode().replace('\r', '').strip('\n').rstrip()
+    stderr = stderr.decode().replace('\r', '').strip('\n').rstrip()
     if stderr:
         text += f'<code>{html.escape(stderr)}</code>\n'
     if stdout:
