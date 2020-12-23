@@ -139,13 +139,12 @@ async def _ParseCommandArguments(client, message):
 	entity_id = None
 	reason = ""
 	reasonstart = 0
+	entity0 = entity1 = None
 
 	# Always assume the replied-to message is the intended user
 	if not getattr(message.reply_to_message, 'empty', True):
 		entity_id = message.reply_to_message.from_user.id
-
-	entity0 = entity1 = None
-
+	
 	if len(command) >= 1:
 		try:
 			entity0, entit0_client = await get_entity(client, command[0])
@@ -184,13 +183,6 @@ async def _ParseCommandArguments(client, message):
 
 	entity_id, entity_client = await get_entity(client, entity_id)
 	chat_id, chat_client = await get_entity(client, chat_id)
-
-	# make sure the user isn't an idiot.
-	if not entity_id.type in ["private", "bot"] or not chat_id.type in ["group", "supergroup"]:
-		await message.edit(f"<code>You're doing something dumb. Stop it. Get some help! {entity_id.type} - {chat_id.type}</code>")
-		await asyncio.sleep(3)
-		await message.delete()
-		return None
 
 	return chat_id, entity_id, reason
 
