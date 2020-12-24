@@ -72,6 +72,8 @@ def _make_sexy(user):
 	username = user.first_name
 	if getattr(user, 'username', None):
 		username = f'<a href="https://t.me/{user.username}">{username}</a>'
+	else:
+		username = f'<a href="tg://user?id={user.id}">{username}</a>'
 	return username
 
 @slave.on_inline_query(filters.regex('^engine_pm-(\d+)$'))
