@@ -300,7 +300,7 @@ async def banhammer(client, message):
 		if message.chat.username:
 			chat_name = f'<a href="https://t.me/{chat_id.username}">{chat_name}</a>'
 
-		chat_text = '<b>Ban Event</b>\n- <b>Chat:</b> ' + chat_name + '\n- <b>Ban:</b> '
+		chat_text = '<b>Userbot Ban Event</b>\n- <b>Chat:</b> ' + chat_name + '\n- <b>Ban:</b> '
 		user_text = entity_id.first_name
 		if entity_id.last_name:
 			user_text += f' {entity_id.last_name} <code>[{entity_id.id}]</code>'
@@ -344,7 +344,7 @@ async def unbanhammer(client, message):
 		if message.chat.username:
 			chat_name = f'<a href="https://t.me/{chat_id.username}">{chat_name}</a>'
 
-		chat_text = '<b>Unban Event</b>\n- <b>Chat:</b> ' + chat_name + '\n- <b>Unban:</b> '
+		chat_text = '<b>Userbot Unban Event</b>\n- <b>Chat:</b> ' + chat_name + '\n- <b>Unban:</b> '
 		user_text = entity_id.first_name
 		if entity_id.last_name:
 			user_text += f' {entity_id.last_name} <code>[{entity_id.id}]</code>'
