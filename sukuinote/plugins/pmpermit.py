@@ -87,10 +87,10 @@ async def main_help(client, inline_query):
 			session.rollback()
 			raise ValueError("PM Permit: What.")
 		if auth.requested:
-			button = [[InlineKeyboardButton("I'm here to offer Bitcoin", callback_data=f"engine_pm_block={inline_query.from_user.id}")]]
+			button = [[InlineKeyboardButton("I'd like to discuss Binances", callback_data=f"engine_pm_block={inline_query.from_user.id}")]]
 		else:
 			button = [
-				[InlineKeyboardButton("I'm here to offer Bitcoin", callback_data=f"engine_pm_block={inline_query.from_user.id}"),
+				[InlineKeyboardButton("I'd like to discuss Binances", callback_data=f"engine_pm_block={inline_query.from_user.id}"),
 				InlineKeyboardButton("Contact me", callback_data=f"engine_pm_nope={inline_query.from_user.id}")],
 			]
 			random.shuffle(button)
@@ -175,35 +175,41 @@ async def approve_pm(client, message):
 				rart = AuthorizedUsers(message.from_user.id, True, False, False)
 				session.add(rart)
 			session.commit()
+			await self_destruct(message, "<code>PM permission was approved!</code>")
 		elif command:
 				for user in command:
 					# Resolve the user
 					try:
 						user, uclient = await get_entity(client, user)
 					except:
+						await message.edit(f"<code>Could not approve {user}</code>")
 						continue
 
 					if user.type != "private":
+						await message.edit(f"<code>This is not a user: {user.title}</code>")
 						continue
 					
 					rart = get_authorized(user.id)
 					if not rart:
 						rart = AuthorizedUsers(user.id, True, False, False)
 						session.add(rart)
+						await message.edit("<code>PM permission was approved!</code>")
 				session.commit()
+				await asyncio.sleep(3)
+				await message.delete()
 		else:
 			if message.reply_to_message:
 				rart = get_authorized(message.reply_to_message.from_user.id)
 				if rart:
 					rart.approved = True
 				else:
-					rart = AuthorizedUsers(message.from_user.id, False, False, False)
+					rart = AuthorizedUsers(message.from_user.id, True, False, False)
 					session.add(rart)
 				session.commit()
+				await self_destruct(message, "<code>PM permission was approved!</code>")
 			else:
-				message.delete()
-				return
-	await self_destruct(message, "<code>PM permission was approved!</code>")
+				await self_destruct(message, "<code>Who am I to approve?</code>")
+	
 
 
 @Client.on_message(filters.me & filters.command(["revoke", "disapprove", "unapprove"], prefixes=config['config']['prefixes']))
@@ -266,7 +272,7 @@ async def pm_button(client, query):
 			await app.block_user(query.from_user.id)
 	elif subcommand == "nope":
 		me = await app.get_me()
-		await slave.edit_inline_text(query.inline_message_id, "Thanks for wanting to contact me! Please be patient!")
+		await slave.edit_inline_text(query.inline_message_id, "Thanks for contacting me, please wait for my response!")
 		buttons = InlineKeyboardMarkup([[InlineKeyboardButton("Block + Report",
 															callback_data=f"engine_pm_blk_rpt={me.id}-{query.from_user.id}")],
 										[InlineKeyboardButton("Approve",
