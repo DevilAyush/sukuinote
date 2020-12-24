@@ -112,7 +112,7 @@ async def id(client, message):
         if getattr(reply, 'document', None):
             text = "\n"
             text += f"<b>File ID:</b> {reply.document.file_id}\n"
-            text += f"<b>File Ref:</b> {reply.document.file_ref}\n"
+            text += f"<b>File Unique ID:</b> {reply.document.file_unique_id}\n"
             text += f"<b>File Name:</b> {reply.document.file_name}\n"
             text += f"<b>File Size:</b> {reply.document.file_size}\n"
             text += f"<b>Mime Type:</b> {reply.document.mime_type}\n"
