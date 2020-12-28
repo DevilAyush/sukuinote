@@ -23,7 +23,7 @@ async def log_ban(client, message):
 			return
 
 	# 1087968824 is @GroupAnonymousBot
-	if not getattr(message.sender_chat, 'empty', True):
+	if getattr(message.sender_chat, 'empty', True):
 		if message.from_user.is_bot:
 			return
 

@@ -12,9 +12,9 @@ lock = asyncio.Lock()
 async def log_warn(client, message):
 	if not config['config']['log_warns']:
 		return
-	
+
 	# 1087968824 is @GroupAnonymousBot
-	if not getattr(message.sender_chat, 'empty', True):
+	if getattr(message.sender_chat, 'empty', True):
 		if message.from_user.is_bot:
 			return
 
