@@ -14,6 +14,7 @@ from pyrogram.types import Chat, User, Message
 from pyrogram.parser import parser
 from pyrogram.methods.chats.get_chat_members import Filters as ChatMemberFilters
 from pyrogram.errors.exceptions.bad_request_400 import PeerIdInvalid, ChannelInvalid
+from pyrogram.errors.exceptions.flood_420 import FloodWait
 
 # Globals.
 loop = asyncio.get_event_loop()
@@ -110,7 +111,13 @@ async def get_app(id):
 	return None
 
 async def log_chat(message):
-	await slave.send_message(config['config']['log_chat'], message, disable_web_page_preview=True)
+	while True:
+		try:
+			await slave.send_message(config['config']['log_chat'], message, disable_web_page_preview=True)
+		except FloodWait as ex:
+			await asyncio.sleep(ex.x + 1)
+		else:
+			break
 
 async def self_destruct(message, text):
 	await message.edit(text)
