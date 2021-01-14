@@ -1,5 +1,6 @@
 import os
 import html
+from io import BytesIO
 from pyrogram import Client, filters
 from pyrogram.errors.exceptions.bad_request_400 import MessageIdInvalid
 from .. import config, help_dict, log_errors, session, progress_callback, public_log_errors
@@ -26,7 +27,12 @@ async def ls(client, message):
             text += f'<code>{html.escape(i)}</code>\n'
         for i in files:
             text += f'<code>{html.escape(i)}</code>\n'
-    await message.reply_text(text or 'Empty', disable_web_page_preview=True)
+    if len(text) > 4096:
+        f = BytesIO(text.encode('utf-8'))
+        f.name = "listing.txt"
+        await message.reply_document(f)
+    else:
+        await message.reply_text(text or 'Empty', disable_web_page_preview=True)
 
 @Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['ul', 'upload'], prefixes=config['config']['prefixes']))
 @log_errors

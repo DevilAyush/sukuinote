@@ -34,18 +34,20 @@ async def kang_stickers(client, message):
 								  "To set a sticker pack, type /setanimation and follow the instructions.", reply_markup=button)
 				await self_destruct(message, "<code>You have not set an animated sticker pack!\nCheck your slave for more information!</code>")
 				return
+			await message.edit("<code>That's a nice sticker you sent in chat, I'm gonna kang it to my kang pack!</code>")
 			await client.download_media(message.reply_to_message.sticker, file_name="cache/sticker.tgs")
 		else:
+			await message.edit("<code>That's a nice sticker you sent in chat, I'm gonna kang it to my kang pack!</code>")
 			await client.download_media(message.reply_to_message.sticker, file_name="cache/sticker.png")
 	elif message.reply_to_message and message.reply_to_message.photo:
+		await message.edit("<code>That's a nice sticker you sent in chat, I'm gonna kang it to my kang pack!</code>")
 		await client.download_media(message.reply_to_message.photo, file_name="cache/sticker.png")
 	elif message.reply_to_message and message.reply_to_message.document and message.reply_to_message.document.mime_type in ["image/png", "image/jpeg"]:
+		await message.edit("<code>That's a nice sticker you sent in chat, I'm gonna kang it to my kang pack!</code>")
 		await client.download_media(message.reply_to_message.document, file_name="cache/sticker.png")
 	else:
 		await self_destruct(message, f"Reply with a sticker or photo to kang it!\nCurrent sticker pack is: {sticker_pack}\nCurrent animation pack is: {animation_pack.sticker}")
 		return
-	
-	await message.edit("<code>That's a nice sticker you sent in chat, I'm gonna kang it to my kang pack!</code>")
 	
 	if ((message.reply_to_message.sticker and message.reply_to_message.sticker.mime_type)) != "application/x" "-tgsticker":
 		im = Image.open("cache/sticker.png")
@@ -106,7 +108,7 @@ async def kang_stickers(client, message):
 	await asyncio.sleep(1)
 	await client.send_message("@Stickers", "/done")
 
-	await client.delete_messages("@Stickers", [ms.message_id for ms in await client.get_history("@Stickers", limit=10)])
+	await client.delete_messages("@Stickers", [ms.message_id for ms in await client.get_history("@Stickers", limit=11)])
 	if message.reply_to_message.sticker and message.reply_to_message.sticker.mime_type == "application/x-tgsticker":
 		await self_destruct(message, f'<code>Kanged! Your pack is <a href="https://t.me/addstickers/{animation_pack.sticker}">here</a>.')
 	else:

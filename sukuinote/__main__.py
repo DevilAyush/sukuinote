@@ -1,6 +1,6 @@
 import asyncio
 from pyrogram import idle
-from . import loop, apps, slave, app_user_ids, session
+from . import loop, apps, slave, app_user_ids, session, log_chat
 
 async def main():
     async def _start_app(app):
@@ -15,6 +15,7 @@ async def main():
                 pass
             await asyncio.sleep(60)
     await asyncio.gather(*(_start_app(app) for app in apps), slave.start())
+    await log_chat("bot started.")
     await idle()
     await asyncio.gather(*(app.stop() for app in apps), slave.stop())
     await session.close()

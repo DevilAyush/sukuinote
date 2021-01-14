@@ -7,14 +7,21 @@ from .. import config, slave, log_errors
 warned = set()
 lock = asyncio.Lock()
 
-@Client.on_message(filters.regex(r'^[/!](?:warn?)(?:$|\W+)') & filters.group)
+@Client.on_message(~filters.chat(config['config']['log_chat']) & filters.regex(r'^[/!](?:[d]*warn?)(?:$|\W+)') & filters.group)
 @log_errors
 async def log_warn(client, message):
 	if not config['config']['log_warns']:
 		return
-	
-	if message.from_user.is_bot and not message.from_user.id == 1087968824:
-		return
+
+	# 1087968824 is @GroupAnonymousBot
+	if getattr(message.sender_chat, 'empty', True):
+		if message.from_user.is_bot:
+			return
+
+	# Ignore the slave forwards
+	if not getattr(message.forward_from, 'empty', True):
+		if message.forward_from.id == (await slave.get_me()).id:
+			return
 
 	identifier = (message.chat.id, message.message_id)
 	async with lock:
@@ -31,17 +38,31 @@ async def log_warn(client, message):
 		if message.chat.is_scam:
 			chat_text += '<code>[SCAM]</code> '
 		text += f'[<code>{message.chat.id}</code>]\n- <b>Warner:</b> '
-		user_text = message.from_user.first_name
-		if message.from_user.last_name:
-			user_text += f' {message.from_user.last_name}'
-		user_text = '<code>[DELETED]</code>' if message.from_user.is_deleted else html.escape(user_text or 'Empty???')
-		if message.from_user.is_verified:
-			user_text += ' <code>[VERIFIED]</code>'
-		if message.from_user.is_support:
-			user_text += ' <code>[SUPPORT]</code>'
-		if message.from_user.is_scam:
-			user_text += ' <code>[SCAM]</code>'
-		text += f'{user_text} [<code>{message.from_user.id}</code>]\n'
+		if message.from_user:
+			user_text = message.from_user.first_name
+			if message.from_user.last_name:
+				user_text += f' {message.from_user.last_name}'
+			user_text = '<code>[DELETED]</code>' if message.from_user.is_deleted else html.escape(user_text or 'Empty???')
+			if message.from_user.is_verified:
+				user_text += ' <code>[VERIFIED]</code>'
+			if message.from_user.is_support:
+				user_text += ' <code>[SUPPORT]</code>'
+			if message.from_user.is_scam:
+				user_text += ' <code>[SCAM]</code>'
+			user_text += f' [<code>{message.from_user.id}</code>]'
+		elif message.sender_chat and message.sender_chat.id != message.chat.id:
+			user_text = html.escape(message.sender_chat.title)
+			if message.sender_chat.username:
+				user_text = f'<a href="https://t.me/{message.sender_chat.username}">{user_text}</a>'
+			if message.sender_chat.is_verified:
+				user_text += ' <code>[VERIFIED]</code>'
+			if message.sender_chat.is_support:
+				user_text += ' <code>[SUPPORT]</code>'
+			if message.sender_chat.is_scam:
+				user_text += ' <code>[SCAM]</code>'
+		else:
+			user_text = 'Anonymous'
+		text += f'{user_text}\n'
 		start, end = message.matches[0].span()
 		text += f'- <b><a href="{message.link}">Warn Message'
 		mtext = (message.text or message.caption or '').strip()

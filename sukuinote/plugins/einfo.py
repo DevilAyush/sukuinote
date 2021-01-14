@@ -1,9 +1,12 @@
 import re
 import html
+import time
 import asyncio
 import datetime
 from pyrogram import Client, filters
-from .. import config, help_dict, get_entity, session, log_errors, public_log_errors
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InlineQueryResultArticle, InputTextMessageContent
+from pyrogram.parser.html import HTML as pyrogram_html
+from .. import config, help_dict, get_entity, session, log_errors, public_log_errors, slave, get_user, get_entity, get_app, app_user_ids
 
 conversation_hack = dict()
 
@@ -49,7 +52,142 @@ DEAI_MODULE_CODES = {
     "8": "Codename Gestapo"
 }
 
-@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['einfo', 'externalinfo', 'bw', 'bolverwatch', 'owl', 'owlantispam', 'sw', 'spamwatch', 'deai', 'spb', 'spamprotection', 'cas', 'combot', 'rose'], prefixes=config['config']['prefixes']))
+# Dictionary of our recent CAS queries.
+cas_queries = dict()
+
+message_lock = asyncio.Lock()
+
+@slave.on_inline_query(filters.regex('^engine_cas-(\d+)$'))
+@log_errors
+async def combot_start(client, inline_query):
+	async with message_lock:
+		user = inline_query.matches[0].group(1)
+		try:
+			u, uc = await get_user(client, user)
+			text = f'CAS messages for: <a href="https://cas.chat/query?u={u.id}">{u.first_name}</a>\n\n'
+		except:
+			text = f'CAS messages for: <a href="https://cas.chat/query?u={user}">{user}</a>\n\n'
+		answers = []
+		results, page  = cas_queries[user]
+		results = results['result']['messages']
+		parser = pyrogram_html(client)
+		for a, result in enumerate(results):
+			full_snippet = None
+			
+			if result:
+				full_snippet = snippet = (await parser.parse(result))['message']
+				total_length = len((await parser.parse(text))['message'])
+				if len(snippet) > 1022 - total_length:
+					snippet = snippet[:1021-total_length] + '…'
+				text += snippet
+			buttons = [
+				InlineKeyboardButton('Back', f'engine_cas_prev={inline_query.from_user.id}-{user}'), 
+				InlineKeyboardButton(f'{a + 1}/{len(results)}', 'wikipedia_nop'),
+				InlineKeyboardButton('Next', f'engine_cas_next={inline_query.from_user.id}-{user}')
+			]
+			if not a:
+				buttons.pop(0)
+			if len(results) == a + 1:
+				buttons.pop()
+			answers.append(InlineQueryResultArticle("Engine CAS", 
+				InputTextMessageContent(text, disable_web_page_preview=True), reply_markup=InlineKeyboardMarkup([buttons]), id=f'cas{a}-{time.time()}', description=full_snippet)
+			)
+		await inline_query.answer(answers, is_personal=True)
+
+@slave.on_callback_query(filters.regex('^engine_cas_(\w+)=(\d+)(?:-(\d+)|)$'))
+@log_errors
+async def combot_info(client, query):
+
+	subcommand = query.matches[0].group(1)
+	app = await get_app(int(query.matches[0].group(2)))
+	me = await app.get_me()
+	target = query.matches[0].group(3)
+	
+	if query.from_user.id not in app_user_ids:
+		await query.answer('...no', cache_time=3600, show_alert=True)
+		return
+		
+	user, client = await get_user(client, target)
+	
+	async with message_lock:
+		if target not in cas_queries:
+			await query.answer('This message is too old', cache_time=3600, show_alert=True)
+			return
+	async with message_lock:
+		origquery, page  = cas_queries[target]
+	results = origquery['result']['messages']
+	opage = page
+	if subcommand == "next":
+		page += 1
+	if subcommand == "prev":
+		page -= 1
+	
+	if page > len(results):
+		page = len(results)
+	if page < 0:
+		page = 0
+		
+	if opage != page:
+		try:
+			text = f'CAS messages for: <a href="https://cas.chat/query?u={user.id}">{user.first_name}</a>\n\n'
+		except:
+			text = f'CAS messages for: <a href="https://cas.chat/query?u={target}">{target}</a>\n\n'
+			
+			
+		result = results[page]
+		if result:
+			parser = pyrogram_html(client)
+			snippet = (await parser.parse(result))['message']
+			total_length = len((await parser.parse(text))['message'])
+			if len(snippet) > 1022 - total_length:
+				snippet = snippet[:1021-total_length] + '…'
+			text += snippet
+		buttons = [
+				InlineKeyboardButton('Back', f'engine_cas_prev={query.from_user.id}-{target}'), 
+				InlineKeyboardButton(f'{page + 1}/{len(results)}', 'wikipedia_nop'),
+				InlineKeyboardButton('Next', f'engine_cas_next={query.from_user.id}-{target}')
+			]
+		if not page:
+			buttons.pop(0)
+		if len(results) == page + 1:
+			buttons.pop()
+		await query.edit_message_text(text, disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup([buttons]))
+		async with message_lock:
+			cas_queries[target] = origquery, page
+	await query.answer()
+	
+
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['cas', 'combot'], prefixes=config['config']['prefixes']))
+@log_errors
+@public_log_errors
+async def combotinfo(client, message):
+	entity = message.from_user
+	args = message.command
+	command = args.pop(0).lower()
+	me = await client.get_me()
+
+	if args:
+		entity = ' '.join(args)
+	elif not getattr(message.reply_to_message, 'empty', True):
+		entity = message.reply_to_message.from_user or entity
+	if isinstance(entity, str) and (not entity.isnumeric() and not entity.startswith('TEL-')):
+		entity, entity_client = await get_entity(client, entity)
+	if not isinstance(entity, str):
+		entity = str(entity.id)
+	
+	# Perform our async request first
+	async with session.get('https://api.cas.chat/check', params={"user_id": entity}) as resp:
+		async with message_lock:
+			# we always start on page 1.
+			cas_queries[entity] = await resp.json(), 0
+
+	# Get the inline results from the function above
+	x = await client.get_inline_bot_results((await slave.get_me()).username, f"engine_cas-{entity}")
+	await client.send_inline_bot_result(message.chat.id, query_id=x.query_id, result_id=x.results[0].id, hide_via=True)
+
+
+
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.command(['einfo', 'externalinfo', 'bw', 'bolverwatch', 'owl', 'owlantispam', 'sw', 'spamwatch', 'deai', 'spb', 'spamprotection', 'rose'], prefixes=config['config']['prefixes']))
 @log_errors
 @public_log_errors
 async def fedstat(client, message):
@@ -81,8 +219,6 @@ async def fedstat(client, message):
         await message.reply_text(f'DEAI:\n{await get_deai(client, entity)}')
     elif command == 'rose':
         await message.reply_text(f'Rose Support:\n{await get_rose(client, entity)}')
-    elif command in ('cas', 'combot'):
-        await message.reply_text(f'CAS:\n{await get_cas(entity)}')
     else:
         spamwatch, owl, bolver, deai, cas, spam_protection, rose = await asyncio.gather(
             get_spamwatch(swtoken, entity),

@@ -28,10 +28,14 @@ def _dumb_wait(pid, timeout):
 
     return False
 
-@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.regex('^(?:' + '|'.join(map(re.escape, config['config']['prefixes'])) + r')(?:(?:ba)?sh|shell|term(?:inal)?)\s+(.+)(?:\n([\s\S]+))?$'))
+SHELL_REGEX = '^(?:' + '|'.join(map(re.escape, config['config']['prefixes'])) + r')(?:(?:ba)?sh|shell|term(?:inal)?)\s+(.+)(?:\n([\s\S]+))?$'
+@Client.on_message(~filters.sticker & ~filters.via_bot & ~filters.edited & filters.me & filters.regex(SHELL_REGEX))
 @log_errors
 @public_log_errors
 async def shell(client, message):
+    match = re.match(SHELL_REGEX, message.text.markdown)
+    if not match:
+        return
     command = message.matches[0].group(1)
     stdin = message.matches[0].group(2)
     process = await asyncio.create_subprocess_shell(command, stdin=asyncio.subprocess.PIPE if stdin else None, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
@@ -43,8 +47,8 @@ async def shell(client, message):
     text = f'<b>Exit Code:</b> <code>{returncode}</code>\n'
     if process.pid in processes:
         del processes[process.pid]
-    stdout = stdout.decode().replace('\r', '').strip('\n')
-    stderr = stderr.decode().replace('\r', '').strip('\n')
+    stdout = stdout.decode().replace('\r', '').strip('\n').rstrip()
+    stderr = stderr.decode().replace('\r', '').strip('\n').rstrip()
     if stderr:
         text += f'<code>{html.escape(stderr)}</code>\n'
     if stdout:

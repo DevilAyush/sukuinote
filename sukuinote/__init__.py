@@ -14,6 +14,7 @@ from pyrogram.types import Chat, User, Message
 from pyrogram.parser import parser
 from pyrogram.methods.chats.get_chat_members import Filters as ChatMemberFilters
 from pyrogram.errors.exceptions.bad_request_400 import PeerIdInvalid, ChannelInvalid
+from pyrogram.errors.exceptions.flood_420 import FloodWait
 
 # Globals.
 loop = asyncio.get_event_loop()
@@ -110,7 +111,13 @@ async def get_app(id):
 	return None
 
 async def log_chat(message):
-	await slave.send_message(config['config']['log_chat'], message, disable_web_page_preview=True)
+	while True:
+		try:
+			await slave.send_message(config['config']['log_chat'], message, disable_web_page_preview=True)
+		except FloodWait as ex:
+			await asyncio.sleep(ex.x + 1)
+		else:
+			break
 
 async def self_destruct(message, text):
 	await message.edit(text)
@@ -139,13 +146,12 @@ async def _ParseCommandArguments(client, message):
 	entity_id = None
 	reason = ""
 	reasonstart = 0
+	entity0 = entity1 = None
 
 	# Always assume the replied-to message is the intended user
 	if not getattr(message.reply_to_message, 'empty', True):
 		entity_id = message.reply_to_message.from_user.id
-
-	entity0 = entity1 = None
-
+	
 	if len(command) >= 1:
 		try:
 			entity0, entit0_client = await get_entity(client, command[0])
@@ -184,13 +190,6 @@ async def _ParseCommandArguments(client, message):
 
 	entity_id, entity_client = await get_entity(client, entity_id)
 	chat_id, chat_client = await get_entity(client, chat_id)
-
-	# make sure the user isn't an idiot.
-	if not entity_id.type in ["private", "bot"] or not chat_id.type in ["group", "supergroup"]:
-		await message.edit(f"<code>You're doing something dumb. Stop it. Get some help! {entity_id.type} - {chat_id.type}</code>")
-		await asyncio.sleep(3)
-		await message.delete()
-		return None
 
 	return chat_id, entity_id, reason
 
