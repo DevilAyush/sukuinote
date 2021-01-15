@@ -27,7 +27,7 @@ async def log_ban(client, message):
 		if message.from_user.is_bot:
 			return
 
-    identifier = (message.chat.id, message.message_id)
+	identifier = (message.chat.id, message.message_id)
 	async with lock:
 		if identifier in banned:
 			return

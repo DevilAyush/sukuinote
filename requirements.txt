@@ -14,4 +14,4 @@ psycopg2
 unidecode
 unitconvert
 #privacy.py
-SQLAlchemy-Utils
+#SQLAlchemy-Utils
